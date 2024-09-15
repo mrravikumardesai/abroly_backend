@@ -50,7 +50,7 @@ const uploadImage = multer({
 const uploadMedia = multer({
     storage: storagePdfAndImage,
     limits: {
-        fileSize: 15 * 1024 * 1024, // Limit file size to 5MB
+        fileSize: 15 * 1024 * 1024, // Limit file size to 15MB
     },
     fileFilter: (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
         // console.log(file);
@@ -60,12 +60,12 @@ const uploadMedia = multer({
             "image/jpeg",
             "application/octet-stream",
             // pdf
-            "application/pdf",
+            // "application/pdf",
             // videos
-            // "video/mp4",
-            // "video/avi",
-            // "video/mpeg",
-            // "video/quicktime"
+            "video/mp4",
+            "video/avi",
+            "video/mpeg",
+            "video/quicktime"
         ]);
 
         if (allowedMimeTypes.has(file.mimetype)) {

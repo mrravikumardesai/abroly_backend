@@ -4,6 +4,7 @@ import Jwt, { DecodeOptions, JsonWebTokenError, VerifyErrors } from "jsonwebtoke
 import { RequestWithUser } from '../utils/types';
 import { Op } from 'sequelize';
 import User from '../model/User';
+import Admin from '../model/Admin';
 
 
 
@@ -25,7 +26,49 @@ const validateUser = async (req: RequestWithUser, res: Response, next: NextFunct
 
 const validateAdmin = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     // console.log("ADMIN VALIDATION")
-    await commmonValidate(req, res, next, ["admin"])
+    // await commmonValidate(req, res, next, ["admin"])
+    let token;
+    let authHeader: string | any = req.headers.authorization || req.headers.Authorization
+    if (authHeader && authHeader.startsWith("Bearer")) {
+        token = authHeader.split(" ")[1];
+        if (!token) return res.status(401).json({ success: false, message: "Provide token" })
+        try {
+            const decoded: any = Jwt.verify(token, secretTokenForJWT); // Ensure correct type match
+            if (!decoded || !decoded.user) {
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
+            }
+            const user = decoded.user as User;
+            
+            const findUser = await Admin.findOne({
+                where: {
+                    uuid: user.user.uuid,
+                    user_type: "admin"
+                },
+                attributes: ["uuid"]
+            })
+            // console.log(findUser,"THE USER ")
+            if (findUser) {
+                req.user = user;
+                req.uuid = user.user.uuid
+                next()
+            }
+            else {
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
+            }
+
+
+
+        } catch (error) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Auth Failed" });
+        }
+    } else {
+        return res.status(401).json({
+            success: false,
+            message: "Please provide token"
+        })
+    }
 }
 const validateAdminOrManager = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     // console.log("ADMIN VALIDATION")

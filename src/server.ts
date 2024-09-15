@@ -74,6 +74,7 @@ const connectDB = async () => {
       console.log("MySQL connected..");
       // create default folders
       createDefaultFolders("profiles")
+      createDefaultFolders("testimonials")
     })
     .catch((e) => {
       console.error("ERROR TO CONNECT DB", e.toString());
