@@ -146,7 +146,7 @@ class ContentWritingResponseController {
                 where: {
                     payment_status: "paid",
                 }
-            })
+            }) 
 
             const findAll = await ContentWritingServicesResponses.findAll({
                 where: {
