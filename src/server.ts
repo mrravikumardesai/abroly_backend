@@ -75,6 +75,7 @@ const connectDB = async () => {
       // create default folders
       createDefaultFolders("profiles")
       createDefaultFolders("testimonials")
+      createDefaultFolders("content_writing_files")
     })
     .catch((e) => {
       console.error("ERROR TO CONNECT DB", e.toString());
