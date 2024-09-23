@@ -21,6 +21,10 @@ const CourseChapters = sequelize.define(
     },
     description:{
       type:DataTypes.TEXT
+    },
+    level:{
+      type:DataTypes.ENUM("level1","level2","level3"),
+      defaultValue:"level1"
     }
   },
   {
