@@ -19,6 +19,11 @@ const Courses = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    is_public:{
+      type:DataTypes.TINYINT,
+      defaultValue:0
+    },
+    // for future reference only
     duration: {
       type: DataTypes.TEXT,
     },
