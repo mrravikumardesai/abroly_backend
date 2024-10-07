@@ -13,7 +13,7 @@ class TestimonialsController {
         try {
             const { name, description } = req.body
             var file_url = "";
-            console.log(req.file);
+            // console.log(req.file);
             
             if (req.file) {
                 file_url = `${Date.now()}-${Math.floor(

@@ -33,7 +33,16 @@ const Courses = sequelize.define(
     },
     price:{
       type:DataTypes.STRING
-    }
+    },
+    banner_image:{
+      type:DataTypes.STRING
+    },
+    access_banner: {
+      type: DataTypes.VIRTUAL,
+      get(this: any) {
+        return this.banner_image && this.banner_image !== ""  ? `${process.env.LOCAL_PATH}public/courses/${this.banner_image}` : null
+      },
+    },
   },
   {
     tableName: 'courses',
