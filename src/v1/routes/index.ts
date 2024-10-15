@@ -10,6 +10,7 @@ import contentWritingRoutes from "./contentWritingRoutes"
 import simCardsRoutes from "./simCardsRoutes"
 import contentWritinResponseRoutes from "./contentWritinResponseRoutes"
 import languagePrepRoutes from "./languagePrepRoutes"
+import healthInsurRoutes from "./healthInsurRoutes"
 
 
 
@@ -23,6 +24,7 @@ v1_routes.use("/faq",faqRoutes)
 v1_routes.use("/testimonials",testimonialsRoutes)
 v1_routes.use("/content_writing",contentWritingRoutes)
 v1_routes.use("/sim",simCardsRoutes)
+v1_routes.use("/health_in",healthInsurRoutes)
 v1_routes.use("/content_writing_response",contentWritinResponseRoutes)
 v1_routes.use("/language_prep",languagePrepRoutes)
 

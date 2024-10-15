@@ -17,6 +17,12 @@ const chapterRoutes = express.Router()
 
 languagePrepRoutes.use("/chapters", chapterRoutes)
 
+chapterRoutes.route("/add").post(validateAdmin,LanguagePrepController.addChapter)
+chapterRoutes.route("/update").post(validateAdmin,LanguagePrepController.updateChapter)
+chapterRoutes.route("/list").post(validateAdmin,LanguagePrepController.getChapters)
+chapterRoutes.route("/get").post(validateAdmin,LanguagePrepController.getChapter)
+
+// video content 
 chapterRoutes.route("/add").post(validateAdmin, LanguagePrepController.addChapter)
 chapterRoutes.route("/update").post(validateAdmin, LanguagePrepController.updateChapter)
 chapterRoutes.route("/list").post(validateAdmin, LanguagePrepController.getChapters)
