@@ -28,10 +28,20 @@ const CourseChapterPoints = sequelize.define(
     file: {
       type: DataTypes.TEXT,
     },
+    // course_chapter_items
+    access_file: {
+      type: DataTypes.VIRTUAL,
+      get(this: any) {
+        return this.file && this.file !== ""  ? `${process.env.LOCAL_PATH}public/course_chapter_items/${this.file}` : null
+      },
+    },
     file_type: {
       type: DataTypes.ENUM("pdf","image"),
       defaultValue:"pdf"
     },
+    video_url:{
+      type:DataTypes.TEXT
+    }
   },
   {
     tableName: 'course_chapter_points',
