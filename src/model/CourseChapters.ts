@@ -25,6 +25,9 @@ const CourseChapters = sequelize.define(
     level:{
       type:DataTypes.ENUM("level1","level2","level3"),
       defaultValue:"level1"
+    },
+    order_number:{
+      type:DataTypes.INTEGER
     }
   },
   {

@@ -136,12 +136,13 @@ class LanguagePrepController {
     async updateChapter(req: RequestWithUser, res: Response) {
         try {
 
-            const { chapter_name, description, uuid } = req.body
+            const { chapter_name, description, uuid,order_number } = req.body
 
 
             await CourseChapters.update({
                 chapter_name,
                 description,
+                order_number
             }, {
                 where: {
                     uuid
@@ -423,7 +424,8 @@ class LanguagePrepController {
                 title,
                 short_description,
                 video_url,
-                uuid
+                uuid,
+                order_number
             } = req.body
             if (!uuid) {
                 returnHelper(res, 200, false, " Failed to action ")
@@ -471,6 +473,7 @@ class LanguagePrepController {
                 ...(title && { title }),
                 ...(short_description && { short_description }),
                 ...(video_url && { video_url }),
+                ...(order_number && { order_number }),
             }
 
             await CourseChapterPoints.update(updateParams, {
@@ -545,6 +548,7 @@ class LanguagePrepController {
                             "chapter_name",
                             "description",
                             "level",
+                            "order_number"
                         ]
                     }
                 ]

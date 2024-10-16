@@ -41,6 +41,9 @@ const CourseChapterPoints = sequelize.define(
     },
     video_url:{
       type:DataTypes.TEXT
+    },
+    order_number:{
+      type:DataTypes.INTEGER
     }
   },
   {
