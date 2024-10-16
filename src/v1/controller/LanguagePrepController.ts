@@ -136,7 +136,7 @@ class LanguagePrepController {
     async updateChapter(req: RequestWithUser, res: Response) {
         try {
 
-            const { chapter_name, description, uuid,order_number } = req.body
+            const { chapter_name, description, uuid, order_number } = req.body
 
 
             await CourseChapters.update({

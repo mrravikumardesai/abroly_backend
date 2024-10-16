@@ -21,10 +21,11 @@ const CUSTOMERID: string | any = process.env.SMSCUSTOMERID
 const secretTokenForJWT: string | any = process.env.ACCESS_TOKEN_SECRET
 
 class UserController {
-    async signupWithNumber(req: Request, res: Response) {
+
+    async signupUser(req: Request, res: Response) {
         try {
 
-            const { phone_number, country_code, user_name: username,email } = req.body
+            const { phone_number, country_code, user_name: username, email } = req.body
 
 
             function generateOTP() {
@@ -125,10 +126,10 @@ class UserController {
             })
         }
     }
-    async signupWithNumberCustom(req: Request, res: Response) {
+    async signupUserCustom(req: Request, res: Response) {
         try {
 
-            const {  phone_number, country_code, user_name: username, email } = req.body
+            const { phone_number, country_code, user_name: username, email } = req.body
 
 
             function generateOTP() {
@@ -354,11 +355,11 @@ class UserController {
                     }
                 })
 
-                if(phone_number == "9799999999" || phone_number == "9799999998"){
+                if (phone_number == "9799999999" || phone_number == "9799999998") {
                     return res.status(200).json({
                         success: true,
                         message: "OTP has been sent successfully.",
-                        verificationId:"demoid"
+                        verificationId: "demoid"
                     })
                 }
                 // otp: otp,
@@ -521,7 +522,7 @@ class UserController {
                 }
             })
 
-    
+
 
             // if (user && (await bcrypt.compare(otp, user.dataValues.otp))) {
 
@@ -591,7 +592,7 @@ class UserController {
             if (user) {
                 // console.log("HERE FIND USER");
 
-                if(phone_number == "9799999999" || phone_number == "9799999998"){
+                if (phone_number == "9799999999" || phone_number == "9799999998") {
                     const sendTokenData = {
                         user: {
                             uuid: user.dataValues.uuid,
@@ -888,7 +889,7 @@ class UserController {
                 }
             })
 
-    
+
 
             // if (user && (await bcrypt.compare(otp, user.dataValues.otp))) {
 
@@ -958,7 +959,7 @@ class UserController {
             if (user) {
                 // console.log("HERE FIND USER");
 
-                if(phone_number == "9799999999" || phone_number == "9799999998"){
+                if (phone_number == "9799999999" || phone_number == "9799999998") {
                     const sendTokenData = {
                         user: {
                             uuid: user.dataValues.uuid,
@@ -1183,6 +1184,322 @@ class UserController {
             })
         }
     }
+    // student
+    async studentValidateOTP(req: Request, res: Response) {
+        try {
+
+            const {
+                phone_number,
+                country_code,
+                otp,
+                device_token,
+                device_id,
+                device_model,
+                verificationId
+            } = req.body
+
+            const user = await User.findOne({
+                where: {
+                    phone_number,
+                    country_code,
+                }
+            })
+
+
+
+            // if (user && (await bcrypt.compare(otp, user.dataValues.otp))) {
+
+
+            //     if (new Date() > new Date(user.dataValues.otp_expire)) {
+            //         return res.status(200).json({
+            //             success: false,
+            //             message: "The OTP has expired!"
+            //         })
+            //     } else {
+
+            //         const sendTokenData = {
+            //             user: {
+            //                 uuid: user.dataValues.uuid,
+            //                 role: user.dataValues.user_type
+            //             },
+            //         };
+
+            //         const accessToken = Jwt.sign({
+            //             user: sendTokenData
+            //         }, secretTokenForJWT, { expiresIn: "90d" });
+            //         // console.log(user, "FIND USER");
+
+            //         let isFirstTime = false
+            //         if (user.dataValues.is_verified == 0) {
+            //             isFirstTime = true
+            //         }
+
+            //         await User.update({
+            //             otp: "",
+            //             otp_expire: "",
+            //             is_verified: 1
+            //         }, {
+            //             where: {
+            //                 uuid: user.dataValues.uuid
+            //             }
+            //         })
+
+            //         // create device 
+            //         const createDevice = await UserDevices.create({
+            //             user_uuid: user.dataValues.uuid,
+            //             device_token,
+            //             device_id,
+            //             device_model,
+            //         })
+
+            //         return res.status(200).json({
+            //             success: true,
+            //             message: "Login Success",
+            //             data: {
+            //                 token: accessToken,
+            //                 name: user.dataValues.username,
+            //                 phone: user.dataValues.phone_number,
+            //                 country_code: user.dataValues.country_code,
+            //                 isFirstTime,
+            //                 device_uuid: createDevice.dataValues.uuid
+            //             }
+            //         })
+            //     }
+            // } else {
+            //     return res.status(200).json({
+            //         success: false,
+            //         message: "invalid OTP!"
+            //     })
+            // }
+
+            if (user) {
+                // console.log("HERE FIND USER");
+
+                if (phone_number == "9799999999" || phone_number == "9799999998") {
+                    const sendTokenData = {
+                        user: {
+                            uuid: user.dataValues.uuid,
+                            role: user.dataValues.user_type
+                        },
+                    };
+
+                    const accessToken = Jwt.sign({
+                        user: sendTokenData
+                    }, secretTokenForJWT, { expiresIn: "90d" });
+                    // console.log(user, "FIND USER");
+
+                    let isFirstTime = false
+                    if (user.dataValues.is_verified == 0) {
+                        isFirstTime = true
+                    }
+
+                    await User.update({
+                        otp: "",
+                        otp_expire: "",
+                        is_verified: 1
+                    }, {
+                        where: {
+                            uuid: user.dataValues.uuid
+                        }
+                    })
+
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Login Success",
+                        data: {
+                            token: accessToken,
+                            name: user.dataValues.username,
+                            phone: user.dataValues.phone_number,
+                            country_code: user.dataValues.country_code,
+                            isFirstTime
+                        }
+                    })
+                }
+
+
+                axios.get(
+                    `https://cpaas.messagecentral.com/auth/v1/authentication/token?country=IN&customerId=C-A970B869F85344C&email=constechifynetworks@gmail.com&key=UnV0dmlrQDQ2&scope=NEW`,).then(async (tokenResponse) => {
+                        // console.log(tokenResponse, "tokenResponse---------------/n")
+                        if (tokenResponse.status == 200 && tokenResponse.data.status == '200') {
+
+
+
+                            await axios.get(
+                                `https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=91&mobileNumber=${phone_number}&verificationId=${verificationId}&customerId=${CUSTOMERID}&code=${otp}`, {
+                                headers: {
+                                    'authToken': tokenResponse.data.token
+                                }
+                            }
+                            )
+                                .then(async (otpResponse) => {
+
+                                    // console.log(otpResponse, "THE VALIDATE RESPONSE")
+                                    if (otpResponse.data.responseCode == 200) {
+
+                                        // if otp is validate than only go for further flow
+
+                                        const sendTokenData = {
+                                            user: {
+                                                uuid: user.dataValues.uuid,
+                                                role: user.dataValues.user_type
+                                            },
+                                        };
+
+                                        const accessToken = Jwt.sign({
+                                            user: sendTokenData
+                                        }, secretTokenForJWT, { expiresIn: "90d" });
+                                        // console.log(user, "FIND USER");
+
+                                        let isFirstTime = false
+                                        if (user.dataValues.is_verified == 0) {
+                                            isFirstTime = true
+                                        }
+
+                                        await Admin.update({
+                                            otp: "",
+                                            otp_expire: "",
+                                            is_verified: 1
+                                        }, {
+                                            where: {
+                                                uuid: user.dataValues.uuid
+                                            }
+                                        })
+
+                                        return res.status(200).json({
+                                            success: true,
+                                            message: "Login Success",
+                                            data: {
+                                                token: accessToken,
+                                                name: user.dataValues.username,
+                                                phone: user.dataValues.phone_number,
+                                                country_code: user.dataValues.country_code,
+                                            }
+                                        })
+
+
+
+                                    }
+                                    else if (otpResponse.data.responseCode == 702) {
+                                        return res.status(200).json({
+                                            success: false,
+                                            message: "Invalid OTP!"
+                                        })
+                                    } else {
+                                        return res.status(200).json({
+                                            success: false,
+                                            message: "OTP verification failed!"
+                                        })
+                                    }
+
+                                })
+                        }
+                    }).catch((error: any) => {
+                        console.error(error.message);
+
+                        return res.status(200).json({
+                            success: false,
+                            message: "Failed to verify OTP!"
+                        })
+                    })
+
+            } else {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid Request!"
+                })
+            }
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    async studentValidateOTPCUstom(req: Request, res: Response) {
+        try {
+
+            const {
+                phone_number,
+                country_code,
+                otp,
+                device_token,
+                device_id,
+                device_model
+            } = req.body
+
+            const user = await User.findOne({
+                where: {
+                    phone_number,
+                    country_code,
+                }
+            })
+
+            if (user && (await bcrypt.compare(otp, user.dataValues.otp))) {
+
+
+                if (new Date() > new Date(user.dataValues.otp_expire)) {
+                    return res.status(200).json({
+                        success: false,
+                        message: "The OTP has expired!"
+                    })
+                } else {
+
+                    const sendTokenData = {
+                        user: {
+                            uuid: user.dataValues.uuid,
+                            role: user.dataValues.user_type
+                        },
+                    };
+
+                    const accessToken = Jwt.sign({
+                        user: sendTokenData
+                    }, secretTokenForJWT, { expiresIn: "90d" });
+                    // console.log(user, "FIND USER");
+
+                    let isFirstTime = false
+                    if (user.dataValues.is_verified == 0) {
+                        isFirstTime = true
+                    }
+
+                    await User.update({
+                        otp: "",
+                        otp_expire: "",
+                        is_verified: 1
+                    }, {
+                        where: {
+                            uuid: user.dataValues.uuid
+                        }
+                    })
+
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Login Success",
+                        data: {
+                            token: accessToken,
+                            name: user.dataValues.username,
+                            phone: user.dataValues.phone_number,
+                            country_code: user.dataValues.country_code,
+                        }
+                    })
+                }
+            } else {
+                return res.status(200).json({
+                    success: false,
+                    message: "invalid OTP!"
+                })
+            }
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
 
 
     async AdminLoginWithNumberCustomLogic(req: Request, res: Response) {
@@ -1302,11 +1619,11 @@ class UserController {
                     }
                 })
 
-                if(phone_number == "9799999999" || phone_number == "9799999998"){
+                if (phone_number == "9799999999" || phone_number == "9799999998") {
                     return res.status(200).json({
                         success: true,
                         message: "OTP has been sent successfully.",
-                        verificationId:"demoid"
+                        verificationId: "demoid"
                     })
                 }
                 // otp: otp,
@@ -1401,7 +1718,189 @@ class UserController {
             })
         }
     }
+    async studentLoginWithNumber(req: Request, res: Response) {
+        try {
 
+            const { phone: phone_number, country_code } = req.body
+
+            const findUser = await User.findOne({
+                where: {
+                    phone_number,
+                    country_code,
+                }
+            })
+
+            if (findUser) {
+
+                function generateOTP() {
+                    // Generate a random 6-digit number
+                    const otp = Math.floor(100000 + Math.random() * 900000);
+                    return otp;
+                }
+
+                const createotp = generateOTP()
+
+                console.log(createotp, "THE OTP");
+
+                const otp = await bcrypt.hash(createotp + "", 10)
+
+                function generateExpiryTime() {
+                    // Get the current time
+                    const currentTime = new Date();
+
+                    // Add 5 minutes to the current time to get the expiration time
+                    const expiryTime = new Date(currentTime.getTime() + 5 * 60000); // 5 minutes in milliseconds
+
+                    return expiryTime;
+                }
+
+                const otp_expire = generateExpiryTime()
+
+                await User.update({
+                    otp,
+                    otp_expire
+                }, {
+                    where: {
+                        uuid: findUser.dataValues.uuid
+                    }
+                })
+
+                if (phone_number == "9799999999" || phone_number == "9799999998") {
+                    return res.status(200).json({
+                        success: true,
+                        message: "OTP has been sent successfully.",
+                        verificationId: "demoid"
+                    })
+                }
+
+                //  generate token 
+                axios.get(
+                    `https://cpaas.messagecentral.com/auth/v1/authentication/token?country=IN&customerId=${CUSTOMERID}&email=constechifynetworks@gmail.com&key=UnV0dmlrQDQ2&scope=NEW`,).then(async (tokenResponse) => {
+                        // console.log(tokenResponse, "tokenResponse---------------/n")
+                        if (tokenResponse.status == 200 && tokenResponse.data.status == '200') {
+                            axios.post(
+                                `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${CUSTOMERID}&flowType=SMS&mobileNumber=${phone_number}`,
+                                // `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${CUSTOMERID}&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${phone_number}&message=Your OTP is ${createotp}, Please do not share it with anyone`,
+                                {},
+                                {
+                                    headers: {
+                                        'authToken': tokenResponse.data.token
+                                    }
+                                }).then((response) => {
+                                    // console.log(response, "RESPONSE---------\n")
+                                    if (response.status == 200) {
+                                        return res.status(200).json({
+                                            success: true,
+                                            message: "OTP has been sent successfully.",
+                                            verificationId: response.data.data.verificationId
+                                        })
+                                    } else {
+                                        return res.status(200).json({
+                                            success: false,
+                                            message: "Failed to send otp, Please try again after some time"
+                                        })
+                                    }
+                                })
+                                .catch((error) => {
+                                    return res.status(200).json({
+                                        success: false,
+                                        message: "Failed to send otp, Please try again after some time"
+                                    })
+                                })
+                        } else {
+                            return res.status(200).json({
+                                success: false,
+                                message: "Failed to send otp, Please try again after some time"
+                            })
+                        }
+
+                    })
+            }
+            else {
+                return res.status(200).json({
+                    success: false,
+                    message: "Phone number not registred YET!"
+                })
+
+            }
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    async studentLoginCustom(req: Request, res: Response) {
+        try {
+
+            const { phone: phone_number, country_code } = req.body
+
+            const findUser = await User.findOne({
+                where: {
+                    phone_number,
+                    country_code,
+                }
+            })
+
+            if (findUser) {
+
+                function generateOTP() {
+                    // Generate a random 6-digit number
+                    // const otp = Math.floor(100000 + Math.random() * 900000);
+                    // generate 4 digit random number
+                    const otp = Math.floor(1000 + Math.random() * 9000);
+                    return otp;
+                }
+
+                const createotp = generateOTP()
+
+                console.log(createotp, "THE OTP");
+
+                const otp = await bcrypt.hash(createotp + "", 10)
+
+                function generateExpiryTime() {
+                    // Get the current time
+                    const currentTime = new Date();
+
+                    // Add 5 minutes to the current time to get the expiration time
+                    const expiryTime = new Date(currentTime.getTime() + 5 * 60000); // 5 minutes in milliseconds
+
+                    return expiryTime;
+                }
+
+                const otp_expire = generateExpiryTime()
+
+                await User.update({
+                    otp,
+                    otp_expire
+                }, {
+                    where: {
+                        uuid: findUser.dataValues.uuid
+                    }
+                })
+                // otp: otp,
+                // otp_expire
+                return res.status(200).json({
+                    success: true,
+                    message: "OTP has been sent successfully.",
+
+                })
+            }
+            else {
+                return res.status(200).json({
+                    success: false,
+                    message: "Phone number not registred YET!"
+                })
+
+            }
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
     async kycTokenType(req: RequestWithUser, res: Response) {
 
         try {
