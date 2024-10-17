@@ -1,3 +1,5 @@
+import Agent from "../model/Agent"
+import AgentProfile from "../model/AgentProfile"
 import CourseChapterPoints from "../model/CourseChapterPoints"
 import CourseChapters from "../model/CourseChapters"
 import Courses from "../model/Courses"
@@ -67,6 +69,11 @@ const associateModels = () => {
         as: "chapter_point_of",
         targetKey: "uuid"
     })
+
+
+    // Define the association for agent and agent profile
+    Agent.hasOne(AgentProfile, { foreignKey: 'agent_id', as: 'profile' });
+    AgentProfile.belongsTo(Agent, { foreignKey: 'agent_id' });
 
 }
 export default associateModels
