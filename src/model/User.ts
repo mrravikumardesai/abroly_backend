@@ -41,7 +41,7 @@ const User = sequelize.define(
     access_profile: {
       type: DataTypes.VIRTUAL,
       get(this: any) {
-        return this.profile_image !== "" ? `${process.env.LOCAL_PATH}public/profiles/${this.profile_image}` : null
+        return this.profile_image  && this.profile_image !== "" ? `${process.env.LOCAL_PATH}public/profiles/${this.profile_image}` : null
       },
     },
     status: {

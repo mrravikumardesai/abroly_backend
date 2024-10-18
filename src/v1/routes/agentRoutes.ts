@@ -3,7 +3,7 @@ import AgentController from '../controller/AgentController';
 import validationBodyMw from '../../middleware/validateBody';
 import { loginWithNumberValidation, otpValidation, sinupWithNumberValidation } from '../validations/userValidations';
 import { AgentNumberExistMw, numberExistMw } from '../../middleware/validateExistMiddleware';
-import { validateAgent } from '../../middleware/authMiddleware';
+import { validateAdmin, validateAgent } from '../../middleware/authMiddleware';
 
 const agentRoutes = express.Router();
 
@@ -15,5 +15,10 @@ agentRoutes.route("/signup").post(validationBodyMw(sinupWithNumberValidation), A
 agentRoutes.route("/signup_custom").post(validationBodyMw(sinupWithNumberValidation), AgentNumberExistMw, AgentController.signupCustom)
 
 agentRoutes.route("/kyc").post(validateAgent, AgentController.kycTokenType)
+
+// agent listing in admin 
+agentRoutes.route("/list_agents").post(validateAdmin, AgentController.agentListing)
+agentRoutes.route("/create").post(validateAdmin,validationBodyMw(sinupWithNumberValidation), AgentNumberExistMw, AgentController.agentCreate)
+agentRoutes.route("/update").post(validateAdmin,AgentController.agentUpdate)
 
 export default agentRoutes;

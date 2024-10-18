@@ -6,6 +6,8 @@ import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
 import axios from "axios";
 import { RequestWithUser } from "../../utils/types";
+import { Op } from "sequelize";
+import User from "../../model/User";
 
 dotenv.config()
 
@@ -36,7 +38,7 @@ class AgentController {
                     country_code,
                 }
             })
-           
+
             if (user) {
                 // console.log("HERE FIND USER");
 
@@ -415,7 +417,7 @@ class AgentController {
                     country_code,
                 }
             })
-            
+
 
             if (findUser) {
 
@@ -653,8 +655,8 @@ class AgentController {
         try {
 
             const role: string = req.user?.user.role || "guest"
-            console.log(role,"ROLE");
-            
+            console.log(role, "ROLE");
+
             const roles = ["agent"]
             if (!roles.includes(role)) {
                 return res.status(200).json({
@@ -701,6 +703,123 @@ class AgentController {
         }
 
     }
+
+
+    async agentListing(req: RequestWithUser, res: Response) {
+        try {
+
+            const { search, offset } = req.body
+
+            const searchCondition = search
+                ? {
+                    [Op.or]: [
+                        { phone_number: { [Op.like]: `%${search}%` } },  // search by phone number
+                        { username: { [Op.like]: `%${search}%` } },      // search by username
+                        { email: { [Op.like]: `%${search}%` } },         // search by email
+                    ]
+                }
+                : {};
+
+            const total = await Agent.count({
+                where: searchCondition
+            })
+            const findAllAgents = await Agent.findAll({
+                where: searchCondition,
+                attributes: [
+                    "uuid",
+                    "phone_number",
+                    "username",
+                    "email",
+                    "role",
+                    "status",
+                    "is_verified",
+                    "profile_image",
+                    "access_profile",
+                    "createdAt",
+                ],
+                offset: offset,
+                limit: 5,
+                order:[["createdAt","DESC"]]
+            })
+
+            return res.status(200).json({
+                success: true,
+                message: "Records Found",
+                data: findAllAgents,
+                total
+            })
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    async agentCreate(req: Request, res: Response) {
+        try {
+
+            const { phone_number, country_code, user_name: username, email } = req.body
+
+            await Agent.create({
+                email,
+                username,
+                phone_number,
+                country_code,
+                user_type: "agent",
+            }).then((created: any) => {
+                return res.status(200).json({
+                    success: true,
+                    message: "Agent Created",
+                })
+            }).catch(e => {
+                // console.log(e)
+                return res.status(200).json({
+                    success: false,
+                    message: e.message
+                })
+            })
+
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    async agentUpdate(req: Request, res: Response) {
+        try {
+
+            const { user_name: username, email, uuid } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Please Provide All Params")
+            }
+            const updateParams = {
+                ...(username && { username }),
+                ...(email && { email }),
+            }
+            await Agent.update(updateParams, {
+                where: {
+                    uuid
+                }
+            })
+            return res.status(200).json({
+                success: true,
+                message: "Agent Updated",
+            })
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
 }
 
 export default new AgentController()
