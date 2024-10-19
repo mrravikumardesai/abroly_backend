@@ -5,6 +5,7 @@ import { RequestWithUser } from '../utils/types';
 import { Op } from 'sequelize';
 import User from '../model/User';
 import Admin from '../model/Admin';
+import Agent from '../model/Agent';
 
 
 
@@ -79,6 +80,10 @@ const validateGeneral = async (req: RequestWithUser, res: Response, next: NextFu
     // console.log("GEN VALIDATIONS")
     await commmonValidate(req, res, next);
 }
+const validateAgent = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    // console.log("GEN VALIDATIONS")
+    await agentValidate(req, res, next);
+}
 
 const commmonValidate = async (req: RequestWithUser, res: Response, next: NextFunction, user_type: string | string[] = "all", activeSubscription: string = "general") => {
     let token;
@@ -126,8 +131,56 @@ const commmonValidate = async (req: RequestWithUser, res: Response, next: NextFu
         })
     }
 }
+const agentValidate = async (req: RequestWithUser, res: Response, next: NextFunction, user_type: string | string[] = "all", activeSubscription: string = "general") => {
+    let token;
+    let authHeader: string | any = req.headers.authorization || req.headers.Authorization
+    if (authHeader && authHeader.startsWith("Bearer")) {
+        token = authHeader.split(" ")[1];
+        // console.log(token,"TOKEN");
+        
+        if (!token) return res.status(401).json({ success: false, message: "Provide token" })
+        try {
+            const decoded: any = Jwt.verify(token, secretTokenForJWT); // Ensure correct type match
+            if (!decoded || !decoded.user) {
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
+            }
+
+            console.log(decoded,"decoded");
+            
+            const user = decoded.user as User;
+            
+            const findUser = await Agent.findOne({
+                where: user_type == "all" ? {
+                    uuid: user.user.uuid,
+                } : {
+                    uuid: user.user.uuid,
+                    user_type: user_type
+                },
+                attributes: ["uuid"]
+            })
+            if (findUser) {
+                req.user = user;
+                req.uuid = user.user.uuid
+                next()
+            }
+            else {
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
+            }
+
+        } catch (error) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Auth Failed" });
+        }
+    } else {
+        return res.status(401).json({
+            success: false,
+            message: "Please provide token"
+        })
+    }
+}
 
 
 
 
-export { validateUser, validateAdmin, validateGeneral, validateAdminOrManager }
+export { validateUser, validateAdmin, validateGeneral, validateAdminOrManager,validateAgent }

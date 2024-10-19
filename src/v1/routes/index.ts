@@ -12,6 +12,8 @@ import contentWritinResponseRoutes from "./contentWritinResponseRoutes"
 import languagePrepRoutes from "./languagePrepRoutes"
 import healthInsurRoutes from "./healthInsurRoutes"
 import quizRoutes from "./quizRoutes"
+import agentRoutes from "./agentRoutes"
+import studentRoutes from "./studentRoutes"
 
 
 
@@ -30,5 +32,10 @@ v1_routes.use("/content_writing_response", contentWritinResponseRoutes)
 v1_routes.use("/language_prep", languagePrepRoutes)
 v1_routes.use("/quiz", quizRoutes)
 
+// agnet
+v1_routes.use("/agent", agentRoutes)
+
+// student
+v1_routes.use("/student", studentRoutes)
 
 export default v1_routes
