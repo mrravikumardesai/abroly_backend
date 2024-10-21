@@ -572,6 +572,58 @@ class JobPostController {
         }
     }
 
+    async historyJobPost(req: RequestWithUser, res: Response) {
+        try {
+            const { offset, limit } = req.body;
+
+            // Count total number of applicants with search conditions
+            const total = await JobApplicants.count({
+                where: {
+                    user_uuid: req.user?.user?.uuid,
+                },
+            });
+
+            // Find users based on job post with pagination and search
+            const findRecords = await JobApplicants.findAll({
+                where: {
+                    user_uuid: req.user?.user?.uuid,
+                },
+                include: [{
+                    model: JobPost,
+                    as: "applicant_job",
+                    paranoid: true
+                }],
+                limit: limit ? +limit : 10,
+                offset: offset ? +offset : 0,
+                attributes: [
+                    "createdAt",
+                    "uuid",
+                    "status"
+                ],
+                order:[["createdAt","DESC"]]
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Applied",
+                data: findRecords?.map(item => {
+                    return {
+                        ...item?.dataValues?.applicant_job?.dataValues,
+                        status: item.dataValues?.status,
+                        item_createdAt: item.dataValues?.createdAt,
+                    }
+                }),
+                total
+            });
+
+        } catch (error: any) {
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
     // Fetch all job posts created by a specific agent
     async getAgentJobPosts(req: RequestWithUser, res: Response) {
         try {
