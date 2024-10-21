@@ -7,6 +7,10 @@ const JobPost = sequelize.define('JobPost', {
         autoIncrement: true,
         primaryKey: true,
     },
+    uuid: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4
+    },
     agent_uuid: {
         type: DataTypes.STRING,
     },
@@ -59,12 +63,16 @@ const JobPost = sequelize.define('JobPost', {
     skillsRequired: {
         type: DataTypes.STRING, // comma-separated skills
     },
+    description: {
+        type: DataTypes.TEXT, // comma-separated skills
+    },
     applicationDeadline: {
         type: DataTypes.DATE,
     },
 }, {
     tableName: 'job_posts',
     timestamps: true,
+    paranoid:true
 });
 
 export default JobPost;
