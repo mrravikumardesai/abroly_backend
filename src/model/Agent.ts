@@ -25,7 +25,7 @@ const Agent = sequelize.define('Agent', {
         type: DataTypes.STRING,
     },
     role: {
-        type: DataTypes.ENUM("agent", "sub-agent", "visa-agent", "tour-agent"), // Define main roles
+        type: DataTypes.ENUM("agent", "sub-agent", "tour-agent"), // Define main roles
         defaultValue:"agent"
     },
     status: {

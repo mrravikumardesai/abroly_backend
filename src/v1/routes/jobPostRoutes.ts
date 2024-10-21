@@ -13,6 +13,7 @@ jobPostRoutes.route('/is_applied').post(validateGeneral,JobPostController.isAppl
 jobPostRoutes.route('/apply').post(validateGeneral,JobPostController.apply);
 jobPostRoutes.route('/applicants').post(validateAgent, JobPostController.applicants);
 jobPostRoutes.route('/change_status').post(validateAgent, JobPostController.changeStatus);
+jobPostRoutes.route('/history').post(validateGeneral, JobPostController.historyJobPost);
 jobPostRoutes.route('/created_list').get(validateAgent, JobPostController.getAgentJobPosts);
 
 
