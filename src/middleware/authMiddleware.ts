@@ -144,8 +144,6 @@ const agentValidate = async (req: RequestWithUser, res: Response, next: NextFunc
             if (!decoded || !decoded.user) {
                 return res.status(401).json({ success: false, message: 'Unauthorized' });
             }
-
-            console.log(decoded,"decoded");
             
             const user = decoded.user as User;
             

@@ -14,6 +14,7 @@ import healthInsurRoutes from "./healthInsurRoutes"
 import quizRoutes from "./quizRoutes"
 import agentRoutes from "./agentRoutes"
 import studentRoutes from "./studentRoutes"
+import jobPostRoutes from "./jobPostRoutes"
 
 
 
@@ -34,8 +35,13 @@ v1_routes.use("/quiz", quizRoutes)
 
 // agnet
 v1_routes.use("/agent", agentRoutes)
+v1_routes.use("/job_post", jobPostRoutes)
+
+
 
 // student
 v1_routes.use("/student", studentRoutes)
+
+
 
 export default v1_routes

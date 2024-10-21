@@ -21,4 +21,6 @@ agentRoutes.route("/list_agents").post(validateAdmin, AgentController.agentListi
 agentRoutes.route("/create").post(validateAdmin,validationBodyMw(sinupWithNumberValidation), AgentNumberExistMw, AgentController.agentCreate)
 agentRoutes.route("/update").post(validateAdmin,AgentController.agentUpdate)
 
+
+
 export default agentRoutes;

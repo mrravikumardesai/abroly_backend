@@ -3,6 +3,8 @@ import AgentProfile from "../model/AgentProfile"
 import CourseChapterPoints from "../model/CourseChapterPoints"
 import CourseChapters from "../model/CourseChapters"
 import Courses from "../model/Courses"
+import JobApplicants from "../model/JobApplicants"
+import JobPost from "../model/JobPost"
 import User from "../model/User"
 import VisaType from "../model/VisaType"
 
@@ -74,6 +76,29 @@ const associateModels = () => {
     // Define the association for agent and agent profile
     Agent.hasOne(AgentProfile, { foreignKey: 'agent_id', as: 'profile' });
     AgentProfile.belongsTo(Agent, { foreignKey: 'agent_id' });
+
+    JobApplicants.belongsTo(User, {
+        foreignKey: "user_uuid",
+        as: "applicant_user",
+        targetKey: "uuid"
+    })
+    User.hasMany(JobApplicants, {
+        foreignKey: "user_uuid",
+        as: "applied_for",
+        sourceKey: "uuid"
+    })
+
+    JobApplicants.belongsTo(JobPost, {
+        foreignKey: "job_post_uuid",
+        as: "applicant_job",
+        targetKey: "uuid"
+    })
+
+    JobPost.hasMany(JobApplicants,{
+        foreignKey: "job_post_uuid",
+        as: "job_applicants",
+        sourceKey: "uuid"
+    })
 
 }
 export default associateModels
