@@ -2,16 +2,17 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Package = sequelize.define('Package', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    uuid: {
-        type: DataTypes.UUIDV4,
-        defaultValue:DataTypes.UUIDV4
-    },
-    name: {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  uuid: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    unique: true,
+  },
+  name: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -34,8 +35,8 @@ const Package = sequelize.define('Package', {
     allowNull: false
   }
 }, {
-    tableName: 'package',
-    timestamps: true,
+  tableName: 'package',
+  timestamps: true,
 });
 
-module.exports = Package;
+export default Package;
