@@ -1,3 +1,4 @@
+import AddOn from "../model/AddOn"
 import Agent from "../model/Agent"
 import AgentProfile from "../model/AgentProfile"
 import CourseChapterPoints from "../model/CourseChapterPoints"
@@ -5,6 +6,8 @@ import CourseChapters from "../model/CourseChapters"
 import Courses from "../model/Courses"
 import JobApplicants from "../model/JobApplicants"
 import JobPost from "../model/JobPost"
+import Package from "../model/Packages"
+import Subscription from "../model/Subscription"
 import User from "../model/User"
 import VisaType from "../model/VisaType"
 
@@ -94,11 +97,20 @@ const associateModels = () => {
         targetKey: "uuid"
     })
 
-    JobPost.hasMany(JobApplicants,{
+    JobPost.hasMany(JobApplicants, {
         foreignKey: "job_post_uuid",
         as: "job_applicants",
         sourceKey: "uuid"
     })
+
+    Agent.hasMany(Subscription, { foreignKey: 'agent_uuid' });
+    Subscription.belongsTo(Agent, { foreignKey: 'agent_uuid' });
+
+    Package.hasMany(Subscription, { foreignKey: 'package_uuid' });
+    Subscription.belongsTo(Package, { foreignKey: 'package_uuid' });
+
+    Subscription.hasMany(AddOn, { foreignKey: 'subscription_uuid' });
+    AddOn.belongsTo(Subscription, { foreignKey: 'subscription_uuid' });
 
 }
 export default associateModels
