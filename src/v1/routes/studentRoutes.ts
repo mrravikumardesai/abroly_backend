@@ -6,4 +6,9 @@ const studentRoutes = express.Router()
 
 studentRoutes.route("/list").post(validateAdmin,StudentController.studentsListing)
 
+// student add profile 
+
+
+// student details profile
+
 export default studentRoutes
