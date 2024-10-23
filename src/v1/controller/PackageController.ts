@@ -8,10 +8,6 @@ class PackageController {
     // Create Package
     async addPackage(req: RequestWithUser, res: Response) {
         try {
-            // const { error } = validateAddPackage(req.body);
-            // if (error) {
-            //     return returnHelper(res, 201, false, error.details[0].message);
-            // }
 
             const {
                 name,
@@ -20,28 +16,27 @@ class PackageController {
                 leadLimit,
                 teamLimit,
                 jobPostLimit,
-                tourPostLimit,
-                travelLeadLimit,
-                profilePinning,
-                eventBanner,
-                price,
+                job_post_days,
+                price
             } = req.body;
 
-            const packageData = await Package.create({
+            if (!name ||
+                !description) {
+                return returnHelper(res, 200, false, "Please Provide Required Fields")
+            }
+
+            await Package.create({
                 name,
                 description,
                 category,
                 leadLimit,
                 teamLimit,
                 jobPostLimit,
-                tourPostLimit,
-                travelLeadLimit,
-                profilePinning,
-                eventBanner,
-                price,
+                job_post_days,
+                price
             });
 
-            return returnHelper(res, 201, true, "Package Created Successfully", packageData);
+            return returnHelper(res, 200, true, "Package Created Successfully");
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message);
         }
@@ -50,12 +45,10 @@ class PackageController {
     // Update Package
     async updatePackage(req: RequestWithUser, res: Response) {
         try {
-            const { error } = validateUpdatePackage(req.body);
-            if (error) {
-                return returnHelper(res, 400, false, error.details[0].message);
+            const { uuid, ...updateFields } = req.body
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Please Provide Required Params")
             }
-
-            const { uuid, ...updateFields } = req.body;
 
             await Package.update(updateFields, {
                 where: {
@@ -75,7 +68,7 @@ class PackageController {
             const { uuid } = req.body;
 
             if (!uuid) {
-                return returnHelper(res, 400, false, "Provide Required Params");
+                return returnHelper(res, 200, false, "Provide Required Params");
             }
 
             await Package.destroy({
@@ -93,8 +86,32 @@ class PackageController {
     // List Packages
     async listPackages(req: RequestWithUser, res: Response) {
         try {
+
             const packages = await Package.findAll({
-                attributes: ["uuid", "name", "description", "category", "price","leadLimit", "createdAt"],
+                attributes: ["uuid", "name", "description", "category", "price", "leadLimit", "teamLimit", "jobPostLimit", "job_post_days", "createdAt"],
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Packages Found",
+                data: packages,
+            });
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+    async detailsPackage(req: RequestWithUser, res: Response) {
+        try {
+            const { uuid } = req.body
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Please Provide required fields")
+            }
+            const packages = await Package.findOne({
+                where: {
+                    uuid
+                },
+                attributes: ["uuid", "name", "description", "category", "price", "leadLimit", "teamLimit", "jobPostLimit", "job_post_days", "createdAt"],
             });
 
             return res.status(200).json({
