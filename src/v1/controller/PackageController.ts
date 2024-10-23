@@ -8,10 +8,10 @@ class PackageController {
     // Create Package
     async addPackage(req: RequestWithUser, res: Response) {
         try {
-            const { error } = validateAddPackage(req.body);
-            if (error) {
-                return returnHelper(res, 400, false, error.details[0].message);
-            }
+            // const { error } = validateAddPackage(req.body);
+            // if (error) {
+            //     return returnHelper(res, 201, false, error.details[0].message);
+            // }
 
             const {
                 name,
@@ -94,7 +94,7 @@ class PackageController {
     async listPackages(req: RequestWithUser, res: Response) {
         try {
             const packages = await Package.findAll({
-                attributes: ["uuid", "name", "description", "category", "price", "createdAt"],
+                attributes: ["uuid", "name", "description", "category", "price","leadLimit", "createdAt"],
             });
 
             return res.status(200).json({
