@@ -16,30 +16,32 @@ const Package = sequelize.define('Package', {
   },
   name: {
     type: DataTypes.STRING,
-   
+
   },
   description: {
     type: DataTypes.TEXT
   },
   category: {
-    type: DataTypes.ENUM('Agent/Consultant', 'Tours & Travel'),
-   
+    type: DataTypes.ENUM('consultant', 'tours_travels', "job_post"),
   },
-  leadLimit: DataTypes.INTEGER,
-  teamLimit: DataTypes.INTEGER,
-  jobPostLimit: DataTypes.INTEGER,
-  tourPostLimit: DataTypes.INTEGER,
-  travelLeadLimit: DataTypes.INTEGER,
-  profilePinning: DataTypes.STRING,
-  eventBanner: DataTypes.STRING,
+  leadLimit: { type: DataTypes.STRING },
+  teamLimit: { type: DataTypes.STRING },
+  jobPostLimit: {
+    type: DataTypes.STRING,
+    defaultValue: 0
+  },
+  job_post_days: {
+    type: DataTypes.STRING,
+    defaultValue: "0"
+  },
   price: {
-    type: DataTypes.FLOAT,
-   
+    type: DataTypes.STRING,
+
   }
 }, {
   tableName: 'package',
   timestamps: true,
-  paranoid:true
+  paranoid: true
 });
 
 export default Package;

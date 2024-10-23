@@ -40,21 +40,11 @@ const Subscription = sequelize.define('Subscription', {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
-    tour_post_limit: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
+    job_post_start_date: {
+        type: DataTypes.DATE
     },
-    travel_lead_limit: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-    },
-    profile_pinning_weeks: {
-        type: DataTypes.STRING,
-        defaultValue: 'none',  // Can store the duration as a string
-    },
-    event_banner_count: {
-        type: DataTypes.STRING,  // Can store as string with format "1/event"
-        defaultValue: 'none',
+    job_post_end_date: {
+        type: DataTypes.DATE
     },
     subscription_start_date: {
         type: DataTypes.DATE,
@@ -67,7 +57,7 @@ const Subscription = sequelize.define('Subscription', {
 }, {
     tableName: 'subscription',
     timestamps: true,
-    paranoid:true
+    paranoid: true
 });
 
 export default Subscription

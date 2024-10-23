@@ -103,14 +103,14 @@ const associateModels = () => {
         sourceKey: "uuid"
     })
 
-    Agent.hasMany(Subscription, { foreignKey: 'agent_uuid' });
-    Subscription.belongsTo(Agent, { foreignKey: 'agent_uuid' });
+    Agent.hasMany(Subscription, { foreignKey: 'agent_uuid',sourceKey:"uuid" });
+    Subscription.belongsTo(Agent, { foreignKey: 'agent_uuid',targetKey:"uuid" });
 
-    Package.hasMany(Subscription, { foreignKey: 'package_uuid' });
-    Subscription.belongsTo(Package, { foreignKey: 'package_uuid' });
+    Package.hasMany(Subscription, { foreignKey: 'package_uuid',sourceKey:"uuid" });
+    Subscription.belongsTo(Package, { foreignKey: 'package_uuid' ,targetKey:"uuid"});
 
-    Subscription.hasMany(AddOn, { foreignKey: 'subscription_uuid' });
-    AddOn.belongsTo(Subscription, { foreignKey: 'subscription_uuid' });
+    Subscription.hasMany(AddOn, { foreignKey: 'subscription_uuid',sourceKey:"uuid" });
+    AddOn.belongsTo(Subscription, { foreignKey: 'subscription_uuid' ,targetKey:"uuid"});
 
 }
 export default associateModels

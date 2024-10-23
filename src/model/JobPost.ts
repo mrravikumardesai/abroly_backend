@@ -69,6 +69,7 @@ const JobPost = sequelize.define('JobPost', {
     applicationDeadline: {
         type: DataTypes.DATE,
     },
+    
 }, {
     tableName: 'job_posts',
     timestamps: true,
