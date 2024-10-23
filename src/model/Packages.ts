@@ -1,5 +1,7 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes } from "sequelize";
+import sequelize from "../config/dbconfig";
+
+
 
 const Package = sequelize.define('Package', {
   id: {
@@ -14,14 +16,14 @@ const Package = sequelize.define('Package', {
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
+   
   },
   description: {
     type: DataTypes.TEXT
   },
   category: {
     type: DataTypes.ENUM('Agent/Consultant', 'Tours & Travel'),
-    allowNull: false
+   
   },
   leadLimit: DataTypes.INTEGER,
   teamLimit: DataTypes.INTEGER,
@@ -32,11 +34,12 @@ const Package = sequelize.define('Package', {
   eventBanner: DataTypes.STRING,
   price: {
     type: DataTypes.FLOAT,
-    allowNull: false
+   
   }
 }, {
   tableName: 'package',
   timestamps: true,
+  paranoid:true
 });
 
 export default Package;

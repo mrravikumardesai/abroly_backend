@@ -15,6 +15,8 @@ import quizRoutes from "./quizRoutes"
 import agentRoutes from "./agentRoutes"
 import studentRoutes from "./studentRoutes"
 import jobPostRoutes from "./jobPostRoutes"
+import subscriptionRoutes from "./subscriptionRoutes"
+import packageRoutes from "./packageRoutes"
 
 
 
@@ -32,6 +34,11 @@ v1_routes.use("/health_in", healthInsurRoutes)
 v1_routes.use("/content_writing_response", contentWritinResponseRoutes)
 v1_routes.use("/language_prep", languagePrepRoutes)
 v1_routes.use("/quiz", quizRoutes)
+
+// subscription & packages
+v1_routes.use("/subscription", subscriptionRoutes)
+v1_routes.use("/packages", packageRoutes)
+
 
 // agnet
 v1_routes.use("/agent", agentRoutes)

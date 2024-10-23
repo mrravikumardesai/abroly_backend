@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/dbconfig";
-import Agent from "./Agent";
 
 const Subscription = sequelize.define('Subscription', {
     id: {
@@ -68,6 +67,7 @@ const Subscription = sequelize.define('Subscription', {
 }, {
     tableName: 'subscription',
     timestamps: true,
+    paranoid:true
 });
 
 export default Subscription
