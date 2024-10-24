@@ -69,11 +69,13 @@ const JobPost = sequelize.define('JobPost', {
     applicationDeadline: {
         type: DataTypes.DATE,
     },
-    
+    job_post_end_date: {
+        type: DataTypes.DATE
+    }
 }, {
     tableName: 'job_posts',
     timestamps: true,
-    paranoid:true
+    paranoid: true
 });
 
 export default JobPost;

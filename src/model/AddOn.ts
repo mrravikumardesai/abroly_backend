@@ -21,17 +21,25 @@ const AddOn = sequelize.define('AddOn', {
             key: 'uuid'
         }
     },
-    addon_type: {
-        type: DataTypes.ENUM('lead', 'team_member', 'profile_pinning', 'event_banner'),
-        allowNull: false
+    agent_uuid: {
+        type: DataTypes.STRING,
     },
-    addon_value: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+    leads_remaining: {
+        type: DataTypes.STRING
+    },
+    team_member_limit: {
+        type: DataTypes.STRING
+    },
+    job_post_limit: {
+        type: DataTypes.STRING
+    },
+    job_post_extend_days: {
+        type: DataTypes.STRING
     },
 }, {
     tableName: 'addon',
     timestamps: true,
+    paranoid: true
 });
 
 export default AddOn;

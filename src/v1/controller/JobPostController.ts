@@ -6,9 +6,44 @@ import { returnHelper } from "../../helpers/returnHelper";
 import JobApplicants from "../../model/JobApplicants";
 import User from "../../model/User";
 import sequelize from "../../config/dbconfig";
+import Subscription from "../../model/Subscription";
 
 
 class JobPostController {
+
+
+    async canJobPost(req: RequestWithUser, res: Response) {
+        try {
+
+            const today = new Date()
+
+            // here check for active subscription 
+            const activeSubscription = await Subscription.findOne({
+                where: {
+                    agent_uuid: req.user?.user?.uuid,
+                    job_post_end_date: {
+                        [Op.gte]: today
+                    }
+                }
+            })
+
+            return res.status(200).json({
+                success: true,
+                message: 'Job Post created successfully',
+                data: activeSubscription ? {
+                    endOn: activeSubscription?.dataValues?.job_post_end_date,
+                    job_post_limit: activeSubscription?.dataValues?.job_post_limit,
+                } : null
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    }
+
+
     async createJobPost(req: RequestWithUser, res: Response) {
         try {
             const {
@@ -145,14 +180,45 @@ class JobPostController {
                 });
             }
 
+            // here check for active subscription 
+            const activeSubscription = await Subscription.findOne({
+                where: {
+                    agent_uuid: req.user?.user?.uuid,
+                    job_post_end_date: {
+                        [Op.gte]: new Date()
+                    },
+                    job_post_limit: {
+                        [Op.gt]: 0
+                    }
+                }
+            })
+
+            if (!activeSubscription) {
+                return returnHelper(res, 200, false, "You Can not add job post, Please purchase package for job post")
+            }
+
 
             const newJobPost = await JobPost.create({
                 agent_uuid: req.user?.user?.uuid,
                 jobType, country, jobRole, salaryMin, salaryMax, experienceRequired,
                 educationLevel, workPermit, overtime, accommodation, transportation, food,
                 medicalInsurance, workHours, agentCharges, skillsRequired, applicationDeadline,
-                description
-            });
+                description, job_post_end_date: activeSubscription?.dataValues?.job_post_end_date
+            }).then(async () => {
+                // activeSubscription
+
+                // decrese number
+                var job_post_limit = +activeSubscription.dataValues.job_post_limit
+                job_post_limit -= 1
+
+                await Subscription.update({
+                    job_post_limit
+                }, {
+                    where: {
+                        uuid: activeSubscription?.dataValues?.uuid
+                    }
+                })
+            })
 
             return res.status(200).json({
                 success: true,
@@ -272,7 +338,11 @@ class JobPostController {
             const { jobType, country, jobRole, salaryMin, salaryMax, experienceRequired, educationLevel, limit, offset } = req.body;
 
             // Build dynamic filter conditions
-            const filterConditions: any = {};
+            const filterConditions: any = {
+                job_post_end_date: {
+                    [Op.gte]: new Date()
+                }
+            };
 
             if (jobType) {
                 filterConditions.jobType = jobType;
@@ -359,8 +429,12 @@ class JobPostController {
             // Query the job posts based on the dynamic filter conditions
             const jobPost = await JobPost.findOne({
                 where: {
-                    uuid
+                    uuid,
+                    job_post_end_date: {
+                        [Op.gte]: new Date()
+                    }
                 },
+                paranoid: false
             });
 
             return res.status(200).json({
@@ -591,7 +665,17 @@ class JobPostController {
                 include: [{
                     model: JobPost,
                     as: "applicant_job",
-                    paranoid: true
+                    paranoid: false,
+                    attributes: [
+                        "uuid",
+                        "jobRole",
+                        "jobType",
+                        "country",
+                        "salaryMin",
+                        "salaryMax",
+                        "experienceRequired",
+                        "deletedAt",
+                    ]
                 }],
                 limit: limit ? +limit : 10,
                 offset: offset ? +offset : 0,
@@ -600,7 +684,7 @@ class JobPostController {
                     "uuid",
                     "status"
                 ],
-                order:[["createdAt","DESC"]]
+                order: [["createdAt", "DESC"]]
             });
 
             return res.status(200).json({
@@ -628,10 +712,26 @@ class JobPostController {
     async getAgentJobPosts(req: RequestWithUser, res: Response) {
         try {
 
+            const { status } = req.params
+
+            const whereCondition = {
+                agent_uuid: req.user?.user?.uuid,
+            }
+
+            if (status == "active") {
+                whereCondition["job_post_end_date"] = {
+                    [Op.gte]: new Date()
+                }
+            }
+
+            if (status == "inactive") {
+                whereCondition["job_post_end_date"] = {
+                    [Op.lt]: new Date()
+                }
+            }
+
             const agentJobPosts = await JobPost.findAll({
-                where: {
-                    agent_uuid: req.user?.user?.uuid,
-                },
+                where: whereCondition,
                 attributes: {
                     include: [
                         [
@@ -655,7 +755,6 @@ class JobPostController {
                 success: true,
                 data: agentJobPosts,
             });
-
 
         } catch (error) {
             return res.status(500).json({
