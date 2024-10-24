@@ -231,7 +231,7 @@ class AgentController {
                         is_verified: 1
                     }, {
                         where: {
-                            uuid: user.dataValues.uuid
+                            uuid: user?.dataValues?.uuid
                         }
                     })
 
@@ -240,9 +240,9 @@ class AgentController {
                         message: "Login Success",
                         data: {
                             token: accessToken,
-                            name: user.dataValues.username,
-                            phone: user.dataValues.phone_number,
-                            country_code: user.dataValues.country_code,
+                            name: user?.dataValues?.username,
+                            phone: user?.dataValues?.phone_number,
+                            country_code: user?.dataValues?.country_code,
                         }
                     })
                 }
@@ -415,6 +415,7 @@ class AgentController {
                 where: {
                     phone_number,
                     country_code,
+                    status:'active'
                 }
             })
 
@@ -464,10 +465,24 @@ class AgentController {
                 })
             }
             else {
-                return res.status(200).json({
-                    success: false,
-                    message: "Phone number not registred YET!"
+
+                // find if status is inactive
+                const isInActiveAgent = await Agent.findOne({
+                    where: {
+                        phone_number,
+                        country_code,
+                        status:'inactive'
+                    }
                 })
+
+                if(isInActiveAgent){
+                    return returnHelper(res,200,false,"You're Profile deactivated from admin, please contact admin")
+                }else{
+                    return res.status(200).json({
+                        success: false,
+                        message: "Phone number not registred YET!"
+                    })
+                }
 
             }
         } catch (error: any) {
@@ -657,9 +672,9 @@ class AgentController {
             const role: string = req.user?.user.role || "guest"
             console.log(role, "ROLE");
 
-            const roles = ["agent"]
+            const roles = ["agent","sub-agent"]
             if (!roles.includes(role)) {
-                return res.status(200).json({
+                return res.status(401).json({
                     success: false,
                     message: "Auth Failed"
                 })
@@ -675,6 +690,7 @@ class AgentController {
                         "email",
                         "profile_image",
                         "status",
+                        "designation",
                         "role",
                         "access_profile",
                         "is_verified",
@@ -688,6 +704,7 @@ class AgentController {
                         role: role,
                         profile: findUser?.access_profile || "",
                         name: findUser?.dataValues.username,
+                        designation: findUser?.dataValues.designation,
                         phone: findUser?.dataValues.phone_number,
                         country_code: findUser?.dataValues.country_code,
                         is_firstTime: findUser?.dataValues.is_verified == 1 ? false : true
@@ -739,7 +756,7 @@ class AgentController {
                 ],
                 offset: offset,
                 limit: 5,
-                order:[["createdAt","DESC"]]
+                order: [["createdAt", "DESC"]]
             })
 
             return res.status(200).json({
@@ -820,6 +837,81 @@ class AgentController {
         }
     }
 
+    async deleteAgent(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Please Provide All Params")
+            }
+
+            const findSubAgent = await Agent.findOne({
+                where: {
+                    uuid: uuid,
+                }
+            })
+
+            if (!findSubAgent) {
+                return returnHelper(res, 200, false, "Provide Valid Sub Agent To Delete")
+            }
+
+            await Agent.destroy({
+                where: {
+                    uuid: findSubAgent.dataValues.uuid
+                }
+            })
+
+            return res.status(200).json({
+                success: true,
+                message: "Sub Agent Deleted",
+            })
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    async toggleAgent(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid, action } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Please Provide All Params")
+            }
+
+            const findSubAgent = await Agent.findOne({
+                where: {
+                    uuid: uuid,
+                }
+            })
+
+            if (!findSubAgent) {
+                return returnHelper(res, 200, false, "Provide Valid Sub Agent To Delete")
+            }
+
+            await Agent.update({ status: action }, {
+                where: {
+                    uuid: findSubAgent.dataValues.uuid
+                }
+            })
+
+            return res.status(200).json({
+                success: true,
+                message: "Status Updated",
+            })
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
 }
 
 export default new AgentController()
