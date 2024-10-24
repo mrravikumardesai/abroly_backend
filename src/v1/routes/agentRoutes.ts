@@ -20,7 +20,6 @@ agentRoutes.route("/kyc").post(validateAgent, AgentController.kycTokenType)
 agentRoutes.route("/list_agents").post(validateAdmin, AgentController.agentListing)
 agentRoutes.route("/create").post(validateAdmin,validationBodyMw(sinupWithNumberValidation), AgentNumberExistMw, AgentController.agentCreate)
 agentRoutes.route("/update").post(validateAdmin,AgentController.agentUpdate)
-
-
+agentRoutes.route("/toggle").post(validateAdmin,AgentController.toggleAgent)
 
 export default agentRoutes;

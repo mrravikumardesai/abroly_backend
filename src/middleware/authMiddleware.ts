@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 import User from '../model/User';
 import Admin from '../model/Admin';
 import Agent from '../model/Agent';
+import { returnHelper } from '../helpers/returnHelper';
 
 
 
@@ -148,11 +149,9 @@ const agentValidate = async (req: RequestWithUser, res: Response, next: NextFunc
             const user = decoded.user as User;
             
             const findUser = await Agent.findOne({
-                where: user_type == "all" ? {
+                where: {
                     uuid: user.user.uuid,
-                } : {
-                    uuid: user.user.uuid,
-                    user_type: user_type
+                    status:"active"
                 },
                 attributes: ["uuid"]
             })
@@ -162,7 +161,19 @@ const agentValidate = async (req: RequestWithUser, res: Response, next: NextFunc
                 next()
             }
             else {
-                return res.status(401).json({ success: false, message: 'Unauthorized' });
+                const inactiveAgent = await Agent.findOne({
+                    where: {
+                        uuid: user.user.uuid,
+                        status:"inactive"
+                    },
+                    attributes: ["uuid"]
+                })
+
+                if(inactiveAgent){
+                    return returnHelper(res,401,false,"Profile Inactive From Admin, Please contact Administrator for this website")
+                }else{   
+                    return res.status(401).json({ success: false, message: 'Unauthorized' });
+                }
             }
 
         } catch (error) {
