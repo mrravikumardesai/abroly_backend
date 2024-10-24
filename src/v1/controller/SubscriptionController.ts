@@ -5,6 +5,7 @@ import { returnHelper } from "../../helpers/returnHelper";
 import { validateAddSubscription, validateUpdateSubscription } from "../validations/subscriptionValidators";
 import Package from "../../model/Packages";
 import { Op } from "sequelize";
+import AddOn from "../../model/AddOn";
 // Import validation functions
 
 class SubscriptionController {
@@ -49,6 +50,164 @@ class SubscriptionController {
             });
 
             return returnHelper(res, 200, true, "New Subscription Assigned", subscription);
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+
+    async assignCustomSubscription(req: RequestWithUser, res: Response) {
+        try {
+
+            const { agent_uuid,
+                leadLimit,
+                teamLimit,
+                jobPostLimit,
+                job_post_days,
+            } = req.body;
+
+            if (!agent_uuid) {
+                return returnHelper(res, 200, false, "Please Provide Agent ")
+            }
+
+            // start date and end date 
+            const startDate = new Date()
+
+            const endDate = new Date()
+
+            endDate.setDate(startDate.getDate() + +job_post_days)
+
+            const subscription = await Subscription.create({
+                agent_uuid,
+                package_uuid: "",
+                leads_remaining: leadLimit,
+                team_member_limit: teamLimit,
+                job_post_limit: jobPostLimit,
+                job_post_start_date: startDate,
+                job_post_end_date: endDate,
+                subscription_start_date: new Date()
+            });
+
+            return returnHelper(res, 200, true, "Custom Subscription Assigned");
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+    async customAddOn(req: RequestWithUser, res: Response) {
+        try {
+
+            const {
+                subscription_uuid,
+                leadLimit,
+                teamLimit,
+                jobPostLimit,
+                job_post_days,
+            } = req.body;
+
+            const updateParms = {}
+
+            if (!subscription_uuid) {
+                return returnHelper(res, 200, false, "Please Add Subscription First")
+            }
+
+            // find subscription
+            const findSubscription = await Subscription.findOne({
+                where: {
+                    uuid: subscription_uuid,
+                },
+                order: [["createdAt", "DESC"]]
+            })
+
+            if (!findSubscription) {
+                return returnHelper(res, 200, false, "Please Add Any subscription first")
+            }
+
+            // team members limit
+            if (teamLimit && teamLimit !== "") {
+                updateParms["team_member_limit"] = +teamLimit + +findSubscription.dataValues.team_member_limit
+            }
+
+            // lead limit
+            if (leadLimit && leadLimit !== "") {
+                updateParms["leads_remaining"] = +leadLimit + +findSubscription.dataValues.leads_remaining
+            }
+
+            // jobPostLimit
+            if (jobPostLimit && jobPostLimit !== "") {
+                updateParms["job_post_limit"] = +jobPostLimit + +findSubscription.dataValues.job_post_limit
+            }
+
+            // job_post_days 
+            if (job_post_days && job_post_days !== "") {
+                const job_post_end_date = new Date(findSubscription?.dataValues?.job_post_end_date)
+                job_post_end_date.setDate(job_post_end_date.getDate() + +job_post_days)
+                updateParms["job_post_end_date"] = job_post_end_date
+            }
+
+            // now create ADD ON 
+            await AddOn.create({
+                agent_uuid: findSubscription.dataValues.agent_uuid,
+                leads_remaining: leadLimit,
+                team_member_limit: teamLimit,
+                job_post_limit: jobPostLimit,
+                job_post_extend_days: job_post_days,
+                subscription_uuid
+            })
+
+            // update subscription 
+            await Subscription.update(updateParms, {
+                where: {
+                    uuid: subscription_uuid
+                }
+            })
+
+            return returnHelper(res, 200, true, "Add on Assigned");
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+
+    async listAddOnes(req: RequestWithUser, res: Response) {
+        try {
+
+            const { agent_uuid, offset, limit } = req.body
+
+            if (!agent_uuid) {
+                return returnHelper(res, 200, false, "Pelase Provide Required Params")
+            }
+
+            const total = await AddOn.count({
+                where: {
+                    agent_uuid
+                },
+            })
+
+            const findAddedAddOnes = await AddOn.findAll({
+                where: {
+                    agent_uuid
+                },
+                attributes: [
+                    "uuid",
+                    "leads_remaining",
+                    "team_member_limit",
+                    "job_post_limit",
+                    "job_post_extend_days",
+                    "createdAt"
+                ],
+                order: [["createdAt", "DESC"]],
+                offset: offset ? +offset : 0,
+                limit: limit ? +limit : 0
+            })
+
+            // return returnHelper(res, 200, true, "Records Found", { data: findAddedAddOnes, total })
+            return res.status(200).json({
+                success: true,
+                message: "Records Found",
+                data: findAddedAddOnes,
+                total
+            })
 
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message);
@@ -134,7 +293,15 @@ class SubscriptionController {
                         paranoid: false
                     }
                 ],
-                attributes: ["leads_remaining", "subscription_start_date"],
+                attributes: [
+                    "uuid",
+                    "leads_remaining",
+                    "subscription_start_date",
+                    "team_member_limit",
+                    "job_post_limit",
+                    "job_post_start_date",
+                    "job_post_end_date",
+                ],
                 order: [["createdAt", "DESC"]]
             });
 
