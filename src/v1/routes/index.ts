@@ -18,6 +18,7 @@ import jobPostRoutes from "./jobPostRoutes"
 import subscriptionRoutes from "./subscriptionRoutes"
 import packageRoutes from "./packageRoutes"
 import subAgentRoutes from "./subAgentRoutes"
+import calendarRoutes from "./calendarRoutes"
 
 
 
@@ -50,6 +51,9 @@ v1_routes.use("/sub_agent", subAgentRoutes)
 
 // student
 v1_routes.use("/student", studentRoutes)
+
+// calendar
+v1_routes.use("/calendar", calendarRoutes)
 
 
 
