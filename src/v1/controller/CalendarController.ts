@@ -49,7 +49,7 @@ class CalendarController {
             await Calendar.create({
                 assign_by: req.user?.user?.uuid,
                 title,
-                assgin_to,
+                assgin_to: assgin_to ? assgin_to : req.user?.user?.uuid,
                 description,
                 application_uuid,
                 event_type,
@@ -104,7 +104,19 @@ class CalendarController {
             }
 
             const findRecordsForThisMonth = await Calendar.findAll({
-                where: whereCondition
+                where: whereCondition,
+                attributes:[
+                    "uuid",
+                    "title",
+                    "description",
+                    "application_uuid",
+                    "event_type",
+                    "start_time",
+                    "end_time",
+                    "is_done",
+                    "date",
+                    "createdAt",
+                ]
             })
 
             return returnHelper(res, 200, true, "Records Found", findRecordsForThisMonth)
