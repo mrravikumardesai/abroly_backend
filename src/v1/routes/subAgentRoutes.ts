@@ -12,5 +12,6 @@ subAgentRoutes.route("/update").post(validateAgent,SubAgentControlleṛ.agentUpd
 subAgentRoutes.route("/delete").post(validateAgent,SubAgentControlleṛ.deleteSubAgent)
 subAgentRoutes.route("/toggle").post(validateAgent,SubAgentControlleṛ.toggleSubAgent)
 subAgentRoutes.route("/list").post(validateAgent,SubAgentControlleṛ.listSubAgent)
+subAgentRoutes.route("/all_list").post(validateAgent,SubAgentControlleṛ.allListSubAgent)
 
 export default subAgentRoutes

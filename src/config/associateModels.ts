@@ -1,6 +1,7 @@
 import AddOn from "../model/AddOn"
 import Agent from "../model/Agent"
 import AgentProfile from "../model/AgentProfile"
+import Calendar from "../model/Calendar"
 import CourseChapterPoints from "../model/CourseChapterPoints"
 import CourseChapters from "../model/CourseChapters"
 import Courses from "../model/Courses"
@@ -103,14 +104,40 @@ const associateModels = () => {
         sourceKey: "uuid"
     })
 
-    Agent.hasMany(Subscription, { foreignKey: 'agent_uuid',sourceKey:"uuid" });
-    Subscription.belongsTo(Agent, { foreignKey: 'agent_uuid',targetKey:"uuid" });
+    Agent.hasMany(Subscription, { foreignKey: 'agent_uuid', sourceKey: "uuid" });
+    Subscription.belongsTo(Agent, { foreignKey: 'agent_uuid', targetKey: "uuid" });
 
-    Package.hasMany(Subscription, { foreignKey: 'package_uuid',sourceKey:"uuid" });
-    Subscription.belongsTo(Package, { foreignKey: 'package_uuid' ,targetKey:"uuid"});
+    Package.hasMany(Subscription, { foreignKey: 'package_uuid', sourceKey: "uuid" });
+    Subscription.belongsTo(Package, { foreignKey: 'package_uuid', targetKey: "uuid" });
 
-    Subscription.hasMany(AddOn, { foreignKey: 'subscription_uuid',sourceKey:"uuid" });
-    AddOn.belongsTo(Subscription, { foreignKey: 'subscription_uuid' ,targetKey:"uuid"});
+    Subscription.hasMany(AddOn, { foreignKey: 'subscription_uuid', sourceKey: "uuid" });
+    AddOn.belongsTo(Subscription, { foreignKey: 'subscription_uuid', targetKey: "uuid" });
+
+
+    Calendar.belongsTo(Agent, {
+        foreignKey: "assgin_to",
+        targetKey: "uuid",
+        as: 'to_assign'
+    });
+    
+    Agent.hasMany(Calendar, {
+        foreignKey: "assgin_to",
+        sourceKey: "uuid",
+        as: "events_assigned_to"
+    });
+    
+    Calendar.belongsTo(Agent, {
+        foreignKey: "assign_by",
+        targetKey: "uuid",
+        as: 'by_assign'
+    });
+    
+    Agent.hasMany(Calendar, {
+        foreignKey: "assign_by",
+        sourceKey: "uuid",
+        as: "events_assigned_for"
+    });
+    
 
 }
 export default associateModels

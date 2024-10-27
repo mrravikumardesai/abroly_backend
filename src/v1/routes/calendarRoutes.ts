@@ -11,6 +11,7 @@ const subAgentRotues = express.Router()
 
 // add 
 subAgentRotues.route("/add").post(validateAgent,CalendarController.eventCreate)
+subAgentRotues.route("/action").post(validateAgent,CalendarController.actionEvent)
 subAgentRotues.route("/list").post(validateAgent,CalendarController.listEvents)
 
 // update
@@ -24,6 +25,9 @@ subAgentRotues.route("/list").post(validateAgent,CalendarController.listEvents)
 calendarRoutes.use("/sub_agent",subAgentRotues)
 // for agent
 const agentRoutes = express.Router()
+
+agentRoutes.route("/add").post(validateAgent,CalendarController.eventAddAgent)
+agentRoutes.route("/list").post(validateAgent,CalendarController.agentListEvent)
 
 calendarRoutes.use("/agent",agentRoutes)
 

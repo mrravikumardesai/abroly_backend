@@ -266,6 +266,42 @@ class SubAgentControlleṛ {
         }
     }
 
+    async allListSubAgent(req: RequestWithUser, res: Response) {
+        try {
+
+            const searchCondition = {
+                parent_uuid: req.user?.user?.uuid,
+                role: "sub-agent",
+                status: "active"
+            };
+
+            const findAllAgents = await Agent.findAll({
+                where: searchCondition,
+                attributes: [
+                    "uuid",
+                    "username",
+                    "designation",
+                    "profile_image",
+                    "access_profile",
+                    "createdAt",
+                ],
+                order: [["createdAt", "DESC"]]
+            })
+
+            return res.status(200).json({
+                success: true,
+                message: "Records Found",
+                data: findAllAgents,
+            })
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
 
 
 
