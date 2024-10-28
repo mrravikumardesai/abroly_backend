@@ -67,11 +67,10 @@ const StudentBasicDetails = sequelize.define(
       type: DataTypes.STRING,
     },
     language_proficiency_scores: {
-      type: DataTypes.JSON,  // {exam_name: String, score: String, validity_period: Date}
+      type: DataTypes.INTEGER,  // {exam_name: String, score: String, validity_period: Date}
     },
     work_experience: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
+      type: DataTypes.STRING,
     },
     work_experience_details: {
       type: DataTypes.JSON,  // {role: String, company: String, duration: String}

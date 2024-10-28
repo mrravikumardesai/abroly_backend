@@ -129,11 +129,11 @@ class StudentController {
 
             if (!findStudentDetails) {
 
-                const errors = validateStudentData(req.body);
+                // const errors = validateStudentData(req.body);
 
-                if (errors.length) {
-                    return returnHelper(res, 200, false, errors[0])
-                }
+                // if (errors.length) {
+                //     return returnHelper(res, 200, false, errors[0])
+                // }
 
                 // create one 
                 await StudentBasicDetails.create({
@@ -217,6 +217,60 @@ class StudentController {
             })
 
             return returnHelper(res, 200, true, "Profile Updated")
+
+
+        } catch (error: any) {
+            return res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    async getBasicDetails(req: RequestWithUser, res: Response) {
+
+        try {
+
+            const findStudentDetails = await StudentBasicDetails.findOne({
+                where: {
+                    student_uuid: req.user?.user?.uuid
+                },
+                attributes:[
+                    "study_abroad_intentions",
+                    "study_abroad_reasons",
+                    "field_of_study",
+                    "degree_level",
+                    "career_goals",
+                    "preferred_job_roles",
+                    "course_selection",
+                    "program_duration",
+                    "test_scores",
+                    "test_score_details",
+                    "preferred_country",
+                    "university_preferences",
+                    "scholarship_requirements",
+                    "scholarship_preferences",
+                    "budget",
+                    "academic_performance",
+                    "language_proficiency_scores",
+                    "work_experience",
+                    "work_experience_details",
+                    "interested_in_internships",
+                    "preferred_internship_roles",
+                    "visa_type",
+                    "accommodation_needs",
+                    "accommodation_preferences",
+                    "health_insurance_needs",
+                    "extracurricular_interests",
+                    "previous_applications",
+                    "previous_application_details",
+                    "interested_in_part_time_jobs",
+                    "interested_in_language_courses",
+                    "application_documents",
+                ]
+            })
+
+            return returnHelper(res, 200, true, "Profile Found", findStudentDetails)
 
 
         } catch (error: any) {
