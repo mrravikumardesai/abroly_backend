@@ -19,6 +19,7 @@ import subscriptionRoutes from "./subscriptionRoutes"
 import packageRoutes from "./packageRoutes"
 import subAgentRoutes from "./subAgentRoutes"
 import calendarRoutes from "./calendarRoutes"
+import serviceInfoRoutes from "./serviceInfoRoutes"
 
 
 
@@ -54,6 +55,9 @@ v1_routes.use("/student", studentRoutes)
 
 // calendar
 v1_routes.use("/calendar", calendarRoutes)
+
+// service information pages
+v1_routes.use("/service_info",serviceInfoRoutes)
 
 
 
