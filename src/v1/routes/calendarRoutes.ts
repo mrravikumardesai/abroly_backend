@@ -28,6 +28,7 @@ const agentRoutes = express.Router()
 
 agentRoutes.route("/add").post(validateAgent,CalendarController.eventAddAgent)
 agentRoutes.route("/list").post(validateAgent,CalendarController.agentListEvent)
+agentRoutes.route("/delete").post(validateAgent,CalendarController.deleteEvent)
 
 calendarRoutes.use("/agent",agentRoutes)
 

@@ -118,6 +118,8 @@ class CalendarController {
                     "is_done",
                     "date",
                     "createdAt",
+                    "assgin_to",
+                    "assign_by"
                 ]
             })
 
@@ -277,7 +279,7 @@ class CalendarController {
                     {
                         model: Agent,
                         as: "to_assign",  // Ensure this matches the association alias
-                        attributes:["access_profile","designation","profile_image","username"]
+                        attributes: ["access_profile", "designation", "profile_image", "username"]
                     },
                     // {
                     //     model: Agent,
@@ -287,6 +289,40 @@ class CalendarController {
             })
 
             return returnHelper(res, 200, true, "Records Found", findRecordsForThisMonth)
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
+    // delete event 
+    async deleteEvent(req: RequestWithUser, res: Response) {
+        try {
+
+            const {uuid} = req.body
+
+            if(!uuid){
+                return returnHelper(res,200,false,"Please Provide Required Params")
+            }
+
+            const findEvent = await Calendar.findOne({
+                where:{
+                    uuid,
+                    assign_by:req.user?.user?.uuid
+                }
+            })
+
+            if(!findEvent){
+                return returnHelper(res,200,false,"Can not delete event")
+            }
+
+            await Calendar.destroy({
+                where:{
+                    uuid
+                }
+            })
+
+            return returnHelper(res,200,true,"Event Deleted")
 
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
