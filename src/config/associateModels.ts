@@ -1,6 +1,6 @@
 import AddOn from "../model/AddOn"
 import Agent from "../model/Agent"
-import { AgencyProfile, BranchOffice, Certification, Language } from "../model/AgentProfile"
+import { AgentProfile, BranchOffice, Certification, Language } from "../model/AgentProfile"
 import Calendar from "../model/Calendar"
 import CourseChapterPoints from "../model/CourseChapterPoints"
 import CourseChapters from "../model/CourseChapters"
@@ -114,33 +114,33 @@ const associateModels = () => {
         targetKey: "uuid",
         as: 'to_assign'
     });
-    
+
     Agent.hasMany(Calendar, {
         foreignKey: "assgin_to",
         sourceKey: "uuid",
         as: "events_assigned_to"
     });
-    
+
     Calendar.belongsTo(Agent, {
         foreignKey: "assign_by",
         targetKey: "uuid",
         as: 'by_assign'
     });
-    
+
     Agent.hasMany(Calendar, {
         foreignKey: "assign_by",
         sourceKey: "uuid",
         as: "events_assigned_for"
     });
-    
-    AgencyProfile.hasMany(BranchOffice, { foreignKey: 'agencyProfileId', as: 'branchOffices' });
-    BranchOffice.belongsTo(AgencyProfile, { foreignKey: 'agencyProfileId' });
-  
-    AgencyProfile.hasMany(Certification, { foreignKey: 'agencyProfileId', as: 'certifications' });
-    Certification.belongsTo(AgencyProfile, { foreignKey: 'agencyProfileId' });
-  
-    AgencyProfile.hasMany(Language, { foreignKey: 'agencyProfileId', as: 'languages' });
-    Language.belongsTo(AgencyProfile, { foreignKey: 'agencyProfileId' });
+
+    AgentProfile.hasMany(BranchOffice, { foreignKey: 'agentProfileUUID', as: 'branchOffices', sourceKey: "uuid" });
+    BranchOffice.belongsTo(AgentProfile, { foreignKey: 'agentProfileUUID', targetKey: "uuid" });
+
+    AgentProfile.hasMany(Certification, { foreignKey: 'agentProfileUUID', as: 'certifications', sourceKey: "uuid" });
+    Certification.belongsTo(AgentProfile, { foreignKey: 'agentProfileUUID', targetKey: "uuid" });
+
+    AgentProfile.hasMany(Language, { foreignKey: 'agentProfileUUID', as: 'languages', sourceKey: "uuid" });
+    Language.belongsTo(AgentProfile, { foreignKey: 'agentProfileUUID', targetKey: "uuid" });
 
 }
 export default associateModels

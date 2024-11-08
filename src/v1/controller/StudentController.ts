@@ -60,30 +60,6 @@ class StudentController {
 
     async updateBasicDetails(req: RequestWithUser, res: Response) {
 
-        const validateStudentData = (data: any) => {
-            const errors: string[] = [];
-
-            if (!['Yes', 'No'].includes(data.study_abroad_intentions)) {
-                errors.push('Study abroad intentions must be either "Yes" or "No".');
-            }
-            if (!data.field_of_study) {
-                errors.push('Field of study is required.');
-            }
-            if (!['Bachelor\'s', 'Master\'s', 'Ph.D.'].includes(data.degree_level)) {
-                errors.push('Degree level must be one of Bachelor\'s, Master\'s, or Ph.D.');
-            }
-            if (data.test_scores && !data.test_score_details) {
-                errors.push('Test score details are required if test_scores is true.');
-            }
-            if (data.work_experience && !data.work_experience_details) {
-                errors.push('Work experience details are required if work_experience is true.');
-            }
-            if (!['Student Visa', 'Work Visa'].includes(data.visa_type)) {
-                errors.push('Visa type must be either "Student Visa" or "Work Visa".');
-            }
-            return errors;
-        };
-
         const {
             study_abroad_intentions,
             study_abroad_reasons,

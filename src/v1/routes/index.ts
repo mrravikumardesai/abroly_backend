@@ -20,6 +20,7 @@ import packageRoutes from "./packageRoutes"
 import subAgentRoutes from "./subAgentRoutes"
 import calendarRoutes from "./calendarRoutes"
 import serviceInfoRoutes from "./serviceInfoRoutes"
+import agentProfileRoutes from "./agentProfileRoutes"
 
 
 
@@ -45,6 +46,7 @@ v1_routes.use("/packages", packageRoutes)
 
 // agnet
 v1_routes.use("/agent", agentRoutes)
+v1_routes.use("/agent_profile", agentProfileRoutes)
 v1_routes.use("/job_post", jobPostRoutes)
 
 // sub agent

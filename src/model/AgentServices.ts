@@ -1,8 +1,9 @@
+import { DataTypes } from "sequelize";
 import sequelize from "../config/dbconfig";
 
-const { DataTypes } = require('sequelize');
-
 const AgentServices = sequelize.define('AgentServices', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
     // Course Advisors
     courseAdvising: { type: DataTypes.BOOLEAN, defaultValue: false },
     courseSpecialization: { type: DataTypes.STRING },
@@ -68,7 +69,7 @@ const AgentServices = sequelize.define('AgentServices', {
 }, {
     tableName: 'agent_services', // Optional: specify table name
     timestamps: true, // Disable timestamps if not needed
-    paranoid:true
+    paranoid: true
 });
 
 export default AgentServices
