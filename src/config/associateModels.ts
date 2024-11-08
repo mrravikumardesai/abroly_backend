@@ -1,6 +1,6 @@
 import AddOn from "../model/AddOn"
 import Agent from "../model/Agent"
-import AgentProfile from "../model/AgentProfile"
+import { AgencyProfile, BranchOffice, Certification, Language } from "../model/AgentProfile"
 import Calendar from "../model/Calendar"
 import CourseChapterPoints from "../model/CourseChapterPoints"
 import CourseChapters from "../model/CourseChapters"
@@ -76,11 +76,6 @@ const associateModels = () => {
         targetKey: "uuid"
     })
 
-
-    // Define the association for agent and agent profile
-    Agent.hasOne(AgentProfile, { foreignKey: 'agent_id', as: 'profile' });
-    AgentProfile.belongsTo(Agent, { foreignKey: 'agent_id' });
-
     JobApplicants.belongsTo(User, {
         foreignKey: "user_uuid",
         as: "applicant_user",
@@ -138,6 +133,14 @@ const associateModels = () => {
         as: "events_assigned_for"
     });
     
+    AgencyProfile.hasMany(BranchOffice, { foreignKey: 'agencyProfileId', as: 'branchOffices' });
+    BranchOffice.belongsTo(AgencyProfile, { foreignKey: 'agencyProfileId' });
+  
+    AgencyProfile.hasMany(Certification, { foreignKey: 'agencyProfileId', as: 'certifications' });
+    Certification.belongsTo(AgencyProfile, { foreignKey: 'agencyProfileId' });
+  
+    AgencyProfile.hasMany(Language, { foreignKey: 'agencyProfileId', as: 'languages' });
+    Language.belongsTo(AgencyProfile, { foreignKey: 'agencyProfileId' });
 
 }
 export default associateModels
