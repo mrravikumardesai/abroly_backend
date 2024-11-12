@@ -4,6 +4,7 @@ import { AgentProfile, BranchOffice, Certification, Language } from "../../model
 import { returnHelper } from "../../helpers/returnHelper";
 import fs from 'fs'
 import path from 'path'
+import Agent from "../../model/Agent";
 
 class AgentProfileController {
 
@@ -391,7 +392,27 @@ class AgentProfileController {
                 }
             })
 
-            return returnHelper(res, 200, true, "Profile Found", { basic_profile: agentProfile, branch_office_address: branchOfficeAddress })
+            // agent profile
+            let agentInfo = await Agent.findOne({
+                where: {
+                    uuid: agentUuid
+                },
+                attributes: [
+                    "access_profile",
+                    "country_code",
+                    "createdAt",
+                    "email",
+                    "is_verified",
+                    "phone",
+                    "phone_number",
+                    "profile_image",
+                    "status",
+                    "updatedAt",
+                    "username",
+                ]
+            })
+
+            return returnHelper(res, 200, true, "Profile Found", { basic_profile: agentProfile, branch_office_address: branchOfficeAddress, information: agentInfo })
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
         }
