@@ -1,5 +1,5 @@
 import express from 'express';
-import { validateAdmin } from '../../middleware/authMiddleware';
+import { validateAdmin, validateAgent } from '../../middleware/authMiddleware';
 import SubscriptionController from '../controller/SubscriptionController';
 
 const subscriptionRoutes = express.Router();
@@ -17,5 +17,15 @@ subscriptionRoutes.route("/list").get(validateAdmin, SubscriptionController.list
 
 // subscriptionRoutes.route("/:uuid").get(validateAdmin, SubscriptionController.getSubscriptionByUUID);
 subscriptionRoutes.route("/agent/:agent_uuid").get(validateAdmin, SubscriptionController.getSubscriptionsByAgentUUID);
+
+
+
+// agent active subscription get
+
+const agentSubscription = express.Router()
+
+agentSubscription.route("/active").get(validateAgent,SubscriptionController.getActiveSubscriptionAgent)
+
+subscriptionRoutes.use("/agent_subscription",agentSubscription)
 
 export default subscriptionRoutes;
