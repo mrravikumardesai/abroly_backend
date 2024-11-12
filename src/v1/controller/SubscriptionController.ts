@@ -310,6 +310,40 @@ class SubscriptionController {
             return returnHelper(res, 500, false, error.message);
         }
     }
+
+    // agent
+    async getActiveSubscriptionAgent(req: RequestWithUser, res: Response) {
+        try {
+            const subscriptions = await Subscription.findOne({
+                where: {
+                    agent_uuid: req?.uuid, leads_remaining: {
+                        [Op.gt]: 0
+                    }
+                },
+                include: [
+                    {
+                        model: Package,
+                        attributes: ["name"],
+                        paranoid: false
+                    }
+                ],
+                attributes: [
+                    "uuid",
+                    "leads_remaining",
+                    "subscription_start_date",
+                    "team_member_limit",
+                    "job_post_limit",
+                    "job_post_start_date",
+                    "job_post_end_date",
+                ],
+                order: [["createdAt", "DESC"]]
+            });
+
+            return returnHelper(res, 200, true, "Subscriptions Found", subscriptions);
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
 }
 
 export default new SubscriptionController();
