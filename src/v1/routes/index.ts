@@ -44,7 +44,7 @@ v1_routes.use("/subscription", subscriptionRoutes)
 v1_routes.use("/packages", packageRoutes)
 
 
-// agnet
+// agent
 v1_routes.use("/agent", agentRoutes)
 v1_routes.use("/agent_profile", agentProfileRoutes)
 v1_routes.use("/job_post", jobPostRoutes)

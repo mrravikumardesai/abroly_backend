@@ -18,6 +18,12 @@ const Agent = sequelize.define('Agent', {
         type:DataTypes.STRING,
         defaultValue:"+91"
     },
+    phone: {
+        type: DataTypes.VIRTUAL,
+        get(this: any) {
+          return this.country_code !== null && this.phone_number !== null ? this.country_code + "" + this.phone_number : null
+        },
+      },
     username: {
         type: DataTypes.STRING,
     },
