@@ -4,6 +4,7 @@ import { AgentProfile, BranchOffice, Certification, Language } from "../model/Ag
 import Calendar from "../model/Calendar"
 import CourseChapterPoints from "../model/CourseChapterPoints"
 import CourseChapters from "../model/CourseChapters"
+import CoursePurchase from "../model/CoursePurchase"
 import Courses from "../model/Courses"
 import JobApplicants from "../model/JobApplicants"
 import JobPost from "../model/JobPost"
@@ -141,6 +142,20 @@ const associateModels = () => {
 
     AgentProfile.hasMany(Language, { foreignKey: 'agentProfileUUID', as: 'languages', sourceKey: "uuid" });
     Language.belongsTo(AgentProfile, { foreignKey: 'agentProfileUUID', targetKey: "uuid" });
+
+
+    // course purchase
+    CoursePurchase.belongsTo(Courses, {
+        foreignKey: "course_uuid",
+        targetKey: "uuid",
+        as:"course_of"
+    })
+
+    Courses.hasMany(CoursePurchase, {
+        foreignKey: "course_uuid",
+        sourceKey: "uuid",
+        as:"purchased"
+    })
 
 }
 export default associateModels

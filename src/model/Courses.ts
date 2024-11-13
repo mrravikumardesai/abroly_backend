@@ -34,6 +34,15 @@ const Courses = sequelize.define(
     price:{
       type:DataTypes.STRING
     },
+    level1_price:{
+      type:DataTypes.STRING
+    },
+    level2_price:{
+      type:DataTypes.STRING
+    },
+    level3_price:{
+      type:DataTypes.STRING
+    },
     banner_image:{
       type:DataTypes.STRING
     },

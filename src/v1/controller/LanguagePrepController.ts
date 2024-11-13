@@ -6,13 +6,22 @@ import fs from 'fs'
 import path from 'path'
 import CourseChapters from "../../model/CourseChapters";
 import CourseChapterPoints from "../../model/CourseChapterPoints";
+import CoursePurchase from "../../model/CoursePurchase";
 
 class LanguagePrepController {
 
     async addLanguage(req: RequestWithUser, res: Response) {
         try {
 
-            const { title, description } = req.body
+            const { title, description, level1_price, level2_price, level3_price } = req.body
+
+            if(!title){
+                return returnHelper(res,200,false,"Please Provide Title")
+            }
+            
+            if(!description){
+                return returnHelper(res,200,false,"Please Provide Description")
+            }
 
             var banner_image = "";
 
@@ -23,11 +32,11 @@ class LanguagePrepController {
             }
 
 
-
             await Courses.create({
                 title,
                 description,
-                banner_image
+                banner_image,
+                level1_price, level2_price, level3_price
             })
 
             if (req.file) {
@@ -46,7 +55,11 @@ class LanguagePrepController {
     async editLanguage(req: RequestWithUser, res: Response) {
         try {
 
-            const { title, description, uuid } = req.body
+            const { title, description, uuid ,level1_price, level2_price, level3_price } = req.body
+
+            if(!uuid){
+                return returnHelper(res,200,false,"Invalid Action")
+            }
 
             var banner_image = "";
 
@@ -56,8 +69,16 @@ class LanguagePrepController {
                 )}${path.parse(req.file.originalname).ext}`;
             }
 
+            const updateParams = {
+                ...(title !== undefined && {title}),
+                ...(description !== undefined && {description}),
+                ...(level1_price !== undefined && {level1_price}),
+                ...(level2_price !== undefined && {level2_price}),
+                ...(level3_price !== undefined && {level3_price}),
+            }
 
-            await Courses.update({ title, description }, {
+
+            await Courses.update(updateParams, {
                 where: { uuid }
             })
 
@@ -73,6 +94,45 @@ class LanguagePrepController {
 
             return returnHelper(res, 200, true, "Language Updated!")
 
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
+    async toggleLanguage(req:RequestWithUser,res:Response){
+        try {
+
+            const {uuid,status} = req.body
+
+            if(!uuid || !status){
+                return returnHelper(res,200,false,"Invalid Action")
+            }
+
+            const statusMustBe = ["active","inactive"]
+
+            if(status && !statusMustBe.includes(status)){
+                return returnHelper(res,200,false,"Inavlid Action")
+            }
+
+            const isExist = await Courses.findOne({
+                where:{
+                    uuid
+                }
+            })
+            
+            if(!isExist){
+                return returnHelper(res,200,false,"Invalid Action")
+            }
+
+            await Courses.update({is_public:status == "active" ? 1 : 0},{
+                where:{
+                    uuid
+                }
+            })
+
+            return returnHelper(res,200,true,"Updated")
+
+            
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
         }
@@ -539,6 +599,9 @@ class LanguagePrepController {
                     "banner_image",
                     "description",
                     "title",
+                    "level1_price",
+                    "level2_price",
+                    "level3_price",
                 ],
                 include: [
                     {
@@ -558,6 +621,123 @@ class LanguagePrepController {
                 success: true,
                 data: findLanguages
             })
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+    // purchase level
+    async purchaseLevel(req: RequestWithUser, res: Response) {
+        try {
+
+            const levelMustBe = ["level1", "level2", "level3"]
+
+            const { course_uuid, level } = req.body
+
+            if (course_uuid == undefined) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+            if (level == undefined) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+            if (level && level == "") {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+            if (!levelMustBe.includes(level)) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const isExist = await CoursePurchase.findOne({
+                where: {
+                    course_uuid,
+                    level,
+                    student_uuid: req?.uuid
+                }
+            })
+
+            if (isExist) {
+                return returnHelper(res, 200, false, "This Level already Purchased!!")
+            }
+
+            await CoursePurchase.create({
+                course_uuid,
+                level,
+                student_uuid: req?.uuid
+            })
+
+            return returnHelper(res, 200, true, "Purchase Successfully")
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+    // check purchased or not
+    async purchaseLevelCheck(req: RequestWithUser, res: Response) {
+        try {
+
+            const levelMustBe = ["level1", "level2", "level3"]
+
+            const { course_uuid, level } = req.body
+
+            if (course_uuid == undefined) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+            if (level == undefined) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+            if (level && level == "") {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+            if (!levelMustBe.includes(level)) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const isExist = await CoursePurchase.findOne({
+                where: {
+                    course_uuid,
+                    level,
+                    student_uuid: req?.uuid
+                }
+            })
+
+            if (!isExist) {
+                return returnHelper(res, 200, true, "", { purchase: false })
+            }
+
+            return returnHelper(res, 200, true, "", { purchase: true })
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
+    async purchaseList(req: RequestWithUser, res: Response) {
+        try {
+
+            const findPurchases = await CoursePurchase.findAll({
+                where: {
+                    student_uuid: req?.uuid
+                },
+                attributes: [
+                    "uuid",
+                    "level",
+                    "createdAt"
+                ],
+                include: [
+                    {
+                        model: Courses,
+                        as: "course_of",
+                        attributes: [
+                            "title",
+                            "description",
+                            "banner_image",
+                            "access_banner"
+                        ]
+                    }
+                ]
+            })
+
+            return returnHelper(res, 200, true, "Purchase Found", findPurchases)
 
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
@@ -596,6 +776,8 @@ async function deleteChapterFunction(uuid) {
             }
         })
     }
+
+
 
 
 
