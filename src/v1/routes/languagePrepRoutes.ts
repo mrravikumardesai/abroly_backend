@@ -9,6 +9,7 @@ const languagePrepRoutes = express.Router()
 // add LanguagePrepController
 languagePrepRoutes.route("/add").post(validateAdmin, uploadMedia.single("file"), LanguagePrepController.addLanguage)
 languagePrepRoutes.route("/edit").post(validateAdmin, uploadMedia.single("file"), LanguagePrepController.editLanguage)
+languagePrepRoutes.route("/delete").post(validateAdmin, uploadMedia.single("file"), LanguagePrepController.deleteLanguage)
 languagePrepRoutes.route("/toggle").post(validateAdmin, LanguagePrepController.toggleLanguage)
 languagePrepRoutes.route("/list").post(validateAdmin, LanguagePrepController.listLanguages)
 languagePrepRoutes.route("/details_basic").post(validateAdmin, LanguagePrepController.detailsBasic)

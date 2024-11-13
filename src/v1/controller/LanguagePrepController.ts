@@ -15,12 +15,12 @@ class LanguagePrepController {
 
             const { title, description, level1_price, level2_price, level3_price } = req.body
 
-            if(!title){
-                return returnHelper(res,200,false,"Please Provide Title")
+            if (!title) {
+                return returnHelper(res, 200, false, "Please Provide Title")
             }
-            
-            if(!description){
-                return returnHelper(res,200,false,"Please Provide Description")
+
+            if (!description) {
+                return returnHelper(res, 200, false, "Please Provide Description")
             }
 
             var banner_image = "";
@@ -55,10 +55,10 @@ class LanguagePrepController {
     async editLanguage(req: RequestWithUser, res: Response) {
         try {
 
-            const { title, description, uuid ,level1_price, level2_price, level3_price } = req.body
+            const { title, description, uuid, level1_price, level2_price, level3_price } = req.body
 
-            if(!uuid){
-                return returnHelper(res,200,false,"Invalid Action")
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Invalid Action")
             }
 
             var banner_image = "";
@@ -70,11 +70,11 @@ class LanguagePrepController {
             }
 
             const updateParams = {
-                ...(title !== undefined && {title}),
-                ...(description !== undefined && {description}),
-                ...(level1_price !== undefined && {level1_price}),
-                ...(level2_price !== undefined && {level2_price}),
-                ...(level3_price !== undefined && {level3_price}),
+                ...(title !== undefined && { title }),
+                ...(description !== undefined && { description }),
+                ...(level1_price !== undefined && { level1_price }),
+                ...(level2_price !== undefined && { level2_price }),
+                ...(level3_price !== undefined && { level3_price }),
             }
 
 
@@ -98,41 +98,60 @@ class LanguagePrepController {
             return returnHelper(res, 500, false, error.message)
         }
     }
-
-    async toggleLanguage(req:RequestWithUser,res:Response){
+    async deleteLanguage(req: RequestWithUser, res: Response) {
         try {
 
-            const {uuid,status} = req.body
+            const { uuid } = req.body
 
-            if(!uuid || !status){
-                return returnHelper(res,200,false,"Invalid Action")
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Invalid Action")
             }
 
-            const statusMustBe = ["active","inactive"]
+            await Courses.destroy({
+                where: { uuid }
+            })
 
-            if(status && !statusMustBe.includes(status)){
-                return returnHelper(res,200,false,"Inavlid Action")
+            return returnHelper(res, 200, true, "Language Deleted!")
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
+    async toggleLanguage(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid, status } = req.body
+
+            if (!uuid || !status) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const statusMustBe = ["active", "inactive"]
+
+            if (status && !statusMustBe.includes(status)) {
+                return returnHelper(res, 200, false, "Inavlid Action")
             }
 
             const isExist = await Courses.findOne({
-                where:{
+                where: {
                     uuid
                 }
             })
-            
-            if(!isExist){
-                return returnHelper(res,200,false,"Invalid Action")
+
+            if (!isExist) {
+                return returnHelper(res, 200, false, "Invalid Action")
             }
 
-            await Courses.update({is_public:status == "active" ? 1 : 0},{
-                where:{
+            await Courses.update({ is_public: status == "active" ? 1 : 0 }, {
+                where: {
                     uuid
                 }
             })
 
-            return returnHelper(res,200,true,"Updated")
+            return returnHelper(res, 200, true, "Updated")
 
-            
+
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
         }
@@ -727,6 +746,7 @@ class LanguagePrepController {
                     {
                         model: Courses,
                         as: "course_of",
+                        paranoid: false,
                         attributes: [
                             "title",
                             "description",
