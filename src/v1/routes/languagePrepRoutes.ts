@@ -1,5 +1,5 @@
 import express from 'express'
-import { validateAdmin } from '../../middleware/authMiddleware'
+import { validateAdmin, validateUser } from '../../middleware/authMiddleware'
 import LanguagePrepController from '../controller/LanguagePrepController'
 import { uploadMedia } from '../../middleware/fileUpload'
 
@@ -9,6 +9,7 @@ const languagePrepRoutes = express.Router()
 // add LanguagePrepController
 languagePrepRoutes.route("/add").post(validateAdmin, uploadMedia.single("file"), LanguagePrepController.addLanguage)
 languagePrepRoutes.route("/edit").post(validateAdmin, uploadMedia.single("file"), LanguagePrepController.editLanguage)
+languagePrepRoutes.route("/toggle").post(validateAdmin, LanguagePrepController.toggleLanguage)
 languagePrepRoutes.route("/list").post(validateAdmin, LanguagePrepController.listLanguages)
 languagePrepRoutes.route("/details_basic").post(validateAdmin, LanguagePrepController.detailsBasic)
 
@@ -39,4 +40,12 @@ languagePrepRoutes.use("/public", publicRoutes)
 publicRoutes.route("/list").get(LanguagePrepController.publicListLangaugePreps)
 publicRoutes.route("/details").post(LanguagePrepController.publicDetailsLangaugePreps)
 
+
+const studentRoutes = express.Router()
+studentRoutes.route("/purchase").post(validateUser,LanguagePrepController.purchaseLevel)
+studentRoutes.route("/purchase_check").post(validateUser,LanguagePrepController.purchaseLevelCheck)
+studentRoutes.route("/purchase_list").get(validateUser,LanguagePrepController.purchaseList)
+
+
+languagePrepRoutes.use("/student",studentRoutes)
 export default languagePrepRoutes
