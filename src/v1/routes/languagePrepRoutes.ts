@@ -46,6 +46,8 @@ const studentRoutes = express.Router()
 studentRoutes.route("/purchase").post(validateUser,LanguagePrepController.purchaseLevel)
 studentRoutes.route("/purchase_check").post(validateUser,LanguagePrepController.purchaseLevelCheck)
 studentRoutes.route("/purchase_list").get(validateUser,LanguagePrepController.purchaseList)
+studentRoutes.route("/purchase_course_details").post(validateUser,LanguagePrepController.purchaseCourseDetails)
+studentRoutes.route("/purchase_sub_point_details").post(validateUser,LanguagePrepController.purchaseCourseSubPointDetails)
 
 
 languagePrepRoutes.use("/student",studentRoutes)

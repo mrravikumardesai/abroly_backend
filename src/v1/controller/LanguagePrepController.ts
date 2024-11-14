@@ -764,6 +764,140 @@ class LanguagePrepController {
         }
     }
 
+    async purchaseCourseDetails(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findPurchases = await CoursePurchase.findOne({
+                where: {
+                    student_uuid: req?.uuid,
+                    uuid: uuid
+                },
+                attributes: [
+                    "uuid",
+                    "level",
+                    "course_uuid",
+                    "createdAt"
+                ],
+            })
+
+            if (!findPurchases) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+
+            const findCourse = await Courses.findOne({
+                where: {
+                    uuid: findPurchases?.dataValues?.course_uuid
+                },
+                attributes: [
+                    "title",
+                    "description",
+                    "banner_image",
+                    "access_banner",
+                    "deletedAt",
+                    "uuid"
+                ],
+                include: [
+                    {
+                        model: CourseChapters,
+                        where: {
+                            level: findPurchases?.dataValues?.level
+                        },
+                        as: "chapters",
+                        attributes: [
+                            "chapter_name",
+                            "createdAt",
+                            "description",
+                            "order_number",
+                        ],
+                        include: [
+                            {
+                                model: CourseChapterPoints,
+                                as: "chapter_points",
+                                attributes: [
+                                    "access_file",
+                                    "file",
+                                    "file_type",
+                                    "order_number",
+                                    "short_description",
+                                    "title",
+                                    "uuid",
+                                    "video_url",
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                paranoid: false
+            })
+
+
+
+
+
+            return returnHelper(res, 200, true, "Purchase Found", findCourse)
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
+    async purchaseCourseSubPointDetails(req: RequestWithUser, res: Response) {
+        try {
+
+            const { purchase_id ,point_id} = req.body
+
+            if (!purchase_id) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findPurchases = await CoursePurchase.findOne({
+                where: {
+                    student_uuid: req?.uuid,
+                    uuid: purchase_id
+                },
+                attributes: [
+                    "uuid",
+                    "level",
+                    "course_uuid",
+                    "createdAt"
+                ],
+            })
+
+            if (!findPurchases) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findSubPoint = await CourseChapterPoints.findOne({
+                where:{
+                    uuid:point_id,
+                    course_uuid:findPurchases?.dataValues?.course_uuid
+                },
+                attributes: [
+                    "access_file",
+                    "file",
+                    "file_type",
+                    "order_number",
+                    "short_description",
+                    "title",
+                    "uuid",
+                    "video_url",
+                ]
+            })
+            
+            return returnHelper(res, 200, true, "Purchase Found", findSubPoint)
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
 }
 
 async function deleteChapterFunction(uuid) {
