@@ -19,10 +19,10 @@ const chapterRoutes = express.Router()
 
 languagePrepRoutes.use("/chapters", chapterRoutes)
 
-chapterRoutes.route("/add").post(validateAdmin,LanguagePrepController.addChapter)
-chapterRoutes.route("/update").post(validateAdmin,LanguagePrepController.updateChapter)
-chapterRoutes.route("/list").post(validateAdmin,LanguagePrepController.getChapters)
-chapterRoutes.route("/get").post(validateAdmin,LanguagePrepController.getChapter)
+chapterRoutes.route("/add").post(validateAdmin, LanguagePrepController.addChapter)
+chapterRoutes.route("/update").post(validateAdmin, LanguagePrepController.updateChapter)
+chapterRoutes.route("/list").post(validateAdmin, LanguagePrepController.getChapters)
+chapterRoutes.route("/get").post(validateAdmin, LanguagePrepController.getChapter)
 chapterRoutes.route("/delete").post(validateAdmin, LanguagePrepController.deleteChapter)
 
 // sub chapters 
@@ -43,12 +43,14 @@ publicRoutes.route("/details").post(LanguagePrepController.publicDetailsLangauge
 
 
 const studentRoutes = express.Router()
-studentRoutes.route("/purchase").post(validateUser,LanguagePrepController.purchaseLevel)
-studentRoutes.route("/purchase_check").post(validateUser,LanguagePrepController.purchaseLevelCheck)
-studentRoutes.route("/purchase_list").get(validateUser,LanguagePrepController.purchaseList)
-studentRoutes.route("/purchase_course_details").post(validateUser,LanguagePrepController.purchaseCourseDetails)
-studentRoutes.route("/purchase_sub_point_details").post(validateUser,LanguagePrepController.purchaseCourseSubPointDetails)
+studentRoutes.route("/purchase").post(validateUser, LanguagePrepController.purchaseLevel)
+studentRoutes.route("/purchase_check").post(validateUser, LanguagePrepController.purchaseLevelCheck)
+studentRoutes.route("/purchase_list").get(validateUser, LanguagePrepController.purchaseList)
+studentRoutes.route("/purchase_course_details").post(validateUser, LanguagePrepController.purchaseCourseDetails)
+studentRoutes.route("/purchase_sub_point_details").post(validateUser, LanguagePrepController.purchaseCourseSubPointDetails)
+studentRoutes.route("/progress_check").post(validateUser, LanguagePrepController.getCourseProgress)
+studentRoutes.route("/progress_update").post(validateUser, LanguagePrepController.updateCourseProgress)
 
 
-languagePrepRoutes.use("/student",studentRoutes)
+languagePrepRoutes.use("/student", studentRoutes)
 export default languagePrepRoutes

@@ -7,6 +7,7 @@ import path from 'path'
 import CourseChapters from "../../model/CourseChapters";
 import CourseChapterPoints from "../../model/CourseChapterPoints";
 import CoursePurchase from "../../model/CoursePurchase";
+import CourseProgress from "../../model/CourseProgress";
 
 class LanguagePrepController {
 
@@ -837,10 +838,6 @@ class LanguagePrepController {
                 paranoid: false
             })
 
-
-
-
-
             return returnHelper(res, 200, true, "Purchase Found", findCourse)
 
         } catch (error: any) {
@@ -851,7 +848,7 @@ class LanguagePrepController {
     async purchaseCourseSubPointDetails(req: RequestWithUser, res: Response) {
         try {
 
-            const { purchase_id ,point_id} = req.body
+            const { purchase_id, point_id } = req.body
 
             if (!purchase_id) {
                 return returnHelper(res, 200, false, "Invalid Action")
@@ -875,9 +872,9 @@ class LanguagePrepController {
             }
 
             const findSubPoint = await CourseChapterPoints.findOne({
-                where:{
-                    uuid:point_id,
-                    course_uuid:findPurchases?.dataValues?.course_uuid
+                where: {
+                    uuid: point_id,
+                    course_uuid: findPurchases?.dataValues?.course_uuid
                 },
                 attributes: [
                     "access_file",
@@ -890,8 +887,161 @@ class LanguagePrepController {
                     "video_url",
                 ]
             })
-            
+
             return returnHelper(res, 200, true, "Purchase Found", findSubPoint)
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
+    // get course progress
+
+    async getCourseProgress(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findPurchases = await CoursePurchase.findOne({
+                where: {
+                    student_uuid: req?.uuid,
+                    uuid: uuid
+                },
+                attributes: [
+                    "uuid",
+                    "level",
+                    "course_uuid",
+                    "createdAt"
+                ],
+            })
+
+            if (!findPurchases) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findCourse = await Courses.findOne({
+                where: {
+                    uuid: findPurchases?.dataValues?.course_uuid
+                },
+                attributes: [
+                    "uuid"
+                ],
+                include: [
+                    {
+                        model: CourseChapters,
+                        where: {
+                            level: findPurchases?.dataValues?.level
+                        },
+                        as: "chapters",
+                        attributes: [
+                            "uuid"
+                        ],
+                        include: [
+                            {
+                                model: CourseChapterPoints,
+                                as: "chapter_points",
+                                attributes: [
+                                    "uuid",
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                paranoid: false
+            })
+
+            const subChapters: string[] = []
+
+            findCourse?.dataValues?.chapters?.map(item => {
+                item?.chapter_points?.map(el => {
+                    subChapters.push(el.uuid)
+                })
+            })
+
+            // match the count of sub chapters with exist records count
+            const existTrackCount = await CourseProgress.count({
+                where: {
+                    student_uuid: req?.uuid,
+                    course_purchase_uuid: uuid,
+                }
+            })
+
+            // if count is not same than create records based on which key left
+            if (existTrackCount !== subChapters.length) {
+
+                // here create points
+                await Promise.all(subChapters.map(async (item: string) => {
+
+                    const isRecordExist = await CourseProgress.count({
+                        where: {
+                            student_uuid: req?.uuid,
+                            course_purchase_uuid: uuid,
+                            sub_point_uuid: item
+                        }
+                    })
+
+                    if (isRecordExist == 0) {
+                        // create one
+                        await CourseProgress.create({
+                            student_uuid: req?.uuid,
+                            course_purchase_uuid: uuid,
+                            sub_point_uuid: item
+                        })
+                    }
+                }))
+            }
+
+            // after that find all points and return them
+            const trackPoints = await CourseProgress.findAll({
+                where: {
+                    student_uuid: req?.uuid,
+                    course_purchase_uuid: uuid,
+                },
+                attributes: [
+                    "uuid",
+                    "sub_point_uuid",
+                    "is_completed",
+                ]
+            })
+            return returnHelper(res, 200, true, "Track Found", trackPoints)
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
+    async updateCourseProgress(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const isExist = await CourseProgress.findOne({
+                where: {
+                    sub_point_uuid: uuid,
+                    student_uuid: req?.uuid
+                }
+            })
+
+            if (!isExist) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            await CourseProgress.update({
+                is_completed: 1
+            }, {
+                where: {
+                    uuid: isExist?.dataValues?.uuid
+                }
+            })
+
+            return returnHelper(res, 200, true, "Progress Update")
 
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
