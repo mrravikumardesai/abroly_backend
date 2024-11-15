@@ -8,6 +8,7 @@ import CourseChapters from "../../model/CourseChapters";
 import CourseChapterPoints from "../../model/CourseChapterPoints";
 import CoursePurchase from "../../model/CoursePurchase";
 import CourseProgress from "../../model/CourseProgress";
+import User from "../../model/User";
 
 class LanguagePrepController {
 
@@ -718,14 +719,14 @@ class LanguagePrepController {
                     level,
                     student_uuid: req?.uuid
                 },
-                attributes:["uuid"]
+                attributes: ["uuid"]
             })
 
             if (!isExist) {
                 return returnHelper(res, 200, true, "", { purchase: false })
             }
 
-            return returnHelper(res, 200, true, "", { purchase: true,uuid:isExist?.dataValues?.uuid })
+            return returnHelper(res, 200, true, "", { purchase: true, uuid: isExist?.dataValues?.uuid })
 
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
@@ -1049,6 +1050,74 @@ class LanguagePrepController {
         }
     }
 
+    // certificate
+    async CertificateDetails(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findPurchases = await CoursePurchase.findOne({
+                where: {
+                    uuid: uuid,
+                    is_quiz_submited: 1
+                },
+                attributes: [
+                    "uuid",
+                    "level",
+                    "student_uuid",
+                    "course_uuid",
+                    "completed_at",
+                    "quiz_score",
+                    "createdAt"
+                ],
+            })
+
+            if (!findPurchases) {
+                return returnHelper(res, 200, false, "Invalid URL")
+            }
+
+
+            const findCourse = await Courses.findOne({
+                where: {
+                    uuid: findPurchases?.dataValues?.course_uuid
+                },
+                attributes: [
+                    "title",
+                    "uuid"
+                ],
+                paranoid: false
+            })
+
+            const findStudent = await User.findOne({
+                where: {
+                    uuid: findPurchases?.dataValues?.student_uuid
+                },
+                attributes: [
+                    "username"
+                ],
+                paranoid: false
+            })
+
+            return returnHelper(res, 200, true, "Purchase Found", {
+                course: findCourse,
+                student: findStudent,
+                level: findPurchases?.dataValues?.level,
+                duration: {
+                    start: findPurchases?.dataValues?.createdAt,
+                    complete: findPurchases?.dataValues?.completed_at
+                },
+                certificate_id: uuid
+            })
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
 }
 
 async function deleteChapterFunction(uuid) {
@@ -1083,8 +1152,8 @@ async function deleteChapterFunction(uuid) {
 
         // destroy from progress too
         await CourseProgress.destroy({
-            where:{
-                sub_point_uuid:uuid
+            where: {
+                sub_point_uuid: uuid
             }
         })
     }
