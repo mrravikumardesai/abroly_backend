@@ -717,14 +717,15 @@ class LanguagePrepController {
                     course_uuid,
                     level,
                     student_uuid: req?.uuid
-                }
+                },
+                attributes:["uuid"]
             })
 
             if (!isExist) {
                 return returnHelper(res, 200, true, "", { purchase: false })
             }
 
-            return returnHelper(res, 200, true, "", { purchase: true })
+            return returnHelper(res, 200, true, "", { purchase: true,uuid:isExist?.dataValues?.uuid })
 
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
@@ -1077,6 +1078,13 @@ async function deleteChapterFunction(uuid) {
         await CourseChapterPoints.destroy({
             where: {
                 uuid
+            }
+        })
+
+        // destroy from progress too
+        await CourseProgress.destroy({
+            where:{
+                sub_point_uuid:uuid
             }
         })
     }
