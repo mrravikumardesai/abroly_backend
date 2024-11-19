@@ -53,4 +53,12 @@ studentRoutes.route("/progress_update").post(validateUser, LanguagePrepControlle
 studentRoutes.route("/certificate_details").post(LanguagePrepController.CertificateDetails)
 
 languagePrepRoutes.use("/student", studentRoutes)
+
+
+const adminDetails = express.Router()
+
+adminDetails.route("/enrolled_students").post(validateAdmin,LanguagePrepController.getEnrolledList)
+
+languagePrepRoutes.use("/admin",adminDetails)
+
 export default languagePrepRoutes

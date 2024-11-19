@@ -1118,6 +1118,50 @@ class LanguagePrepController {
         }
     }
 
+    async getEnrolledList(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid } = req.body
+
+            if (!uuid) { return returnHelper(res, 200, false, 'invalid action1') }
+
+            const findAllPurchases = await CoursePurchase.findAll({
+                where: {
+                    course_uuid: uuid
+                },
+                attributes: [
+                    "uuid",
+                    "level",
+                    "is_quiz_submited",
+                    "completed_at",
+                    "quiz_score",
+                    "createdAt"
+                ],
+                include: [
+                    {
+                        model: User,
+                        as: "student",
+                        attributes: [
+                            "uuid",
+                            "access_profile",
+                            "username",
+                            "email",
+                            "phone_number",
+                            "country_code",
+                            "profile_image",
+                            "phone",
+                        ]
+                    }
+                ]
+            })
+
+            return returnHelper(res, 200, true, "Find Students", findAllPurchases)
+
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message)
+        }
+    }
+
 }
 
 async function deleteChapterFunction(uuid) {
@@ -1157,7 +1201,6 @@ async function deleteChapterFunction(uuid) {
             }
         })
     }
-
 
 
 
