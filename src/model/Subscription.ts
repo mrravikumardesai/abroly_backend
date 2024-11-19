@@ -50,6 +50,10 @@ const Subscription = sequelize.define('Subscription', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
+    achievement_banner: {
+        type: DataTypes.STRING,
+        defaultValue: 0
+      },
     status: {
         type: DataTypes.ENUM("active", "expired"),
         defaultValue: "active",

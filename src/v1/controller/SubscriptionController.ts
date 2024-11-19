@@ -25,6 +25,7 @@ class SubscriptionController {
                     "teamLimit",
                     "jobPostLimit",
                     "job_post_days",
+                    "achievement_banner"
                 ]
             })
 
@@ -44,6 +45,7 @@ class SubscriptionController {
                 leads_remaining: findPackage?.dataValues?.leadLimit,
                 team_member_limit: findPackage?.dataValues?.team_member_limit,
                 job_post_limit: findPackage?.dataValues?.jobPostLimit,
+                achievement_banner: findPackage?.dataValues?.achievement_banner,
                 job_post_start_date: startDate,
                 job_post_end_date: endDate,
                 subscription_start_date: new Date()
@@ -64,6 +66,7 @@ class SubscriptionController {
                 teamLimit,
                 jobPostLimit,
                 job_post_days,
+                achievement_banner
             } = req.body;
 
             if (!agent_uuid) {
@@ -85,7 +88,8 @@ class SubscriptionController {
                 job_post_limit: jobPostLimit,
                 job_post_start_date: startDate,
                 job_post_end_date: endDate,
-                subscription_start_date: new Date()
+                subscription_start_date: new Date(),
+                achievement_banner
             });
 
             return returnHelper(res, 200, true, "Custom Subscription Assigned");
@@ -103,6 +107,7 @@ class SubscriptionController {
                 teamLimit,
                 jobPostLimit,
                 job_post_days,
+                achievement_banner
             } = req.body;
 
             const updateParms = {}
@@ -144,6 +149,10 @@ class SubscriptionController {
                 job_post_end_date.setDate(job_post_end_date.getDate() + +job_post_days)
                 updateParms["job_post_end_date"] = job_post_end_date
             }
+            // achievement_banner
+            if (achievement_banner && achievement_banner !== "") {
+                updateParms["achievement_banner"] = +achievement_banner + +findSubscription.dataValues.achievement_banner
+            }
 
             // now create ADD ON 
             await AddOn.create({
@@ -152,7 +161,8 @@ class SubscriptionController {
                 team_member_limit: teamLimit,
                 job_post_limit: jobPostLimit,
                 job_post_extend_days: job_post_days,
-                subscription_uuid
+                subscription_uuid,
+                achievement_banner
             })
 
             // update subscription 
@@ -194,6 +204,7 @@ class SubscriptionController {
                     "team_member_limit",
                     "job_post_limit",
                     "job_post_extend_days",
+                    "achievement_banner",
                     "createdAt"
                 ],
                 order: [["createdAt", "DESC"]],
@@ -256,7 +267,7 @@ class SubscriptionController {
     async listSubscriptions(req: RequestWithUser, res: Response) {
         try {
             const allSubscriptions = await Subscription.findAll({
-                attributes: ["uuid", "agent_uuid", "package_uuid", "leads_remaining", "team_member_limit", "job_post_limit", "tour_post_limit", "travel_lead_limit", "profile_pinning_weeks", "event_banner_count", "createdAt"]
+                attributes: ["uuid", "agent_uuid", "package_uuid", "leads_remaining", "team_member_limit", "job_post_limit", "tour_post_limit", "travel_lead_limit", "profile_pinning_weeks", "event_banner_count", "achievement_banner","createdAt"]
             });
 
             return returnHelper(res, 200, true, "Subscriptions Found", allSubscriptions);
@@ -301,6 +312,7 @@ class SubscriptionController {
                     "job_post_limit",
                     "job_post_start_date",
                     "job_post_end_date",
+                    "achievement_banner"
                 ],
                 order: [["createdAt", "DESC"]]
             });
@@ -335,6 +347,7 @@ class SubscriptionController {
                     "job_post_limit",
                     "job_post_start_date",
                     "job_post_end_date",
+                    "achievement_banner"
                 ],
                 order: [["createdAt", "DESC"]]
             });

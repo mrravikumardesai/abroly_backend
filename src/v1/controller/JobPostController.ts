@@ -24,7 +24,8 @@ class JobPostController {
                     job_post_end_date: {
                         [Op.gte]: today
                     }
-                }
+                },
+                order:[["createdAt","DESC"]]
             })
 
             return res.status(200).json({
@@ -190,7 +191,8 @@ class JobPostController {
                     job_post_limit: {
                         [Op.gt]: 0
                     }
-                }
+                },
+                order:[["createdAt","DESC"]]
             })
 
             if (!activeSubscription) {
