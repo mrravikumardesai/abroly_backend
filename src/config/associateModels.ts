@@ -157,5 +157,19 @@ const associateModels = () => {
         as:"purchased"
     })
 
+
+    // CoursePurchase
+    CoursePurchase.belongsTo(User, {
+        foreignKey: "student_uuid",
+        targetKey: "uuid",
+        as:"student"
+    })
+
+    User.hasMany(CoursePurchase, {
+        foreignKey: "student_uuid",
+        sourceKey: "uuid",
+        as:"courses"
+    })
+
 }
 export default associateModels
