@@ -17,7 +17,8 @@ class PackageController {
                 teamLimit,
                 jobPostLimit,
                 job_post_days,
-                price
+                price,
+                achievement_banner
             } = req.body;
 
             if (!name ||
@@ -33,7 +34,8 @@ class PackageController {
                 teamLimit,
                 jobPostLimit,
                 job_post_days,
-                price
+                price,
+                achievement_banner
             });
 
             return returnHelper(res, 200, true, "Package Created Successfully");
@@ -88,7 +90,7 @@ class PackageController {
         try {
 
             const packages = await Package.findAll({
-                attributes: ["uuid", "name", "description", "category", "price", "leadLimit", "teamLimit", "jobPostLimit", "job_post_days", "createdAt"],
+                attributes: ["uuid", "name", "description", "category", "price", "leadLimit", "teamLimit", "jobPostLimit", "job_post_days","achievement_banner", "createdAt"],
             });
 
             return res.status(200).json({
@@ -111,7 +113,7 @@ class PackageController {
                 where: {
                     uuid
                 },
-                attributes: ["uuid", "name", "description", "category", "price", "leadLimit", "teamLimit", "jobPostLimit", "job_post_days", "createdAt"],
+                attributes: ["uuid", "name", "description", "category", "price", "leadLimit", "teamLimit", "jobPostLimit", "job_post_days", "achievement_banner","createdAt"],
             });
 
             return res.status(200).json({

@@ -25,17 +25,25 @@ const AddOn = sequelize.define('AddOn', {
         type: DataTypes.STRING,
     },
     leads_remaining: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        defaultValue: "0"
     },
     team_member_limit: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        defaultValue: "0"
     },
     job_post_limit: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        defaultValue: "0"
     },
     job_post_extend_days: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        defaultValue: "0"
     },
+    achievement_banner: {
+        type: DataTypes.STRING,
+        defaultValue: 0
+    }
 }, {
     tableName: 'addon',
     timestamps: true,

@@ -6,7 +6,7 @@ import { uploadImage } from '../../middleware/fileUpload'
 const sideBannerRoutes = express.Router()
 
 // get avalible slots
-sideBannerRoutes.route("/get_avalible_slots").post(validateAgent, SideBannerController.avalibleSlot)
+sideBannerRoutes.route("/get_avalible_slots").post(validateAgent, SideBannerController.availableSlot)
 // assign slot
 sideBannerRoutes.route("/assign_slots").post(validateAgent, uploadImage.single("image"), SideBannerController.assignSlot)
 

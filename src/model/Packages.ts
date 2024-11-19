@@ -36,8 +36,11 @@ const Package = sequelize.define('Package', {
   },
   price: {
     type: DataTypes.STRING,
-
-  }
+  },
+  achievement_banner: {
+    type: DataTypes.STRING,
+    defaultValue: 0
+  },
 }, {
   tableName: 'package',
   timestamps: true,
