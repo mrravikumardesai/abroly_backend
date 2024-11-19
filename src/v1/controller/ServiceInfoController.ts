@@ -221,11 +221,6 @@ class ServiceInfoController {
 
             return returnHelper(res, 200, true, "Deleted")
 
-
-
-
-
-
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message)
         }
