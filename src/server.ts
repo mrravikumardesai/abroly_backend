@@ -80,6 +80,7 @@ const connectDB = async () => {
       createDefaultFolders("course_chapter_items")
       createDefaultFolders("service_info")
       createDefaultFolders("certificates")
+      createDefaultFolders("banners")
     })
     .catch((e) => {
       console.error("ERROR TO CONNECT DB", e.toString());

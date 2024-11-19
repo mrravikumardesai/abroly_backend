@@ -21,6 +21,7 @@ import subAgentRoutes from "./subAgentRoutes"
 import calendarRoutes from "./calendarRoutes"
 import serviceInfoRoutes from "./serviceInfoRoutes"
 import agentProfileRoutes from "./agentProfileRoutes"
+import sideBannerRoutes from "./sideBannerRoutes"
 
 
 
@@ -42,6 +43,10 @@ v1_routes.use("/quiz", quizRoutes)
 // subscription & packages
 v1_routes.use("/subscription", subscriptionRoutes)
 v1_routes.use("/packages", packageRoutes)
+
+
+// side banner
+v1_routes.use("/side_banner", sideBannerRoutes)
 
 
 // agent

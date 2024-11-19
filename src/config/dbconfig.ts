@@ -23,6 +23,13 @@ const sequelize = process.env.LOCAL == "mac" ? new Sequelize(MYSQL_DATABASE, 'ro
     {
         host: "localhost",
         dialect: "mysql",
+        // pool: {
+        //     min: 10,
+        //     max: 10000,
+        //     idle: 3000,
+        //     acquire: 1500,
+        //     evict: 4000
+        // }
     },
 )
 
