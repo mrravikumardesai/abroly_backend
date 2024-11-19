@@ -6,6 +6,7 @@ import moment from "moment";
 import { Op } from "sequelize";
 import fs from 'fs'
 import path from 'path'
+import Subscription from "../../model/Subscription";
 
 class SideBannerController {
 
@@ -13,19 +14,19 @@ class SideBannerController {
     async availableSlot(req: RequestWithUser, res: Response) {
         try {
             const { requestedMonth, target_type }: any = req.body; // User passes requestedMonth (e.g., "2025-02")
-    
+
             if (!target_type) {
                 return returnHelper(res, 200, false, "Please Select Target");
             }
-    
+
             if (!requestedMonth) {
                 return returnHelper(res, 200, false, "Please provide requestedMonth in 'YYYY-MM' format.");
             }
-    
+
             // Parse the start and end of the requested month
             const start_date = moment(requestedMonth, 'YYYY-MM').startOf('month').toDate();
             const end_date = moment(requestedMonth, 'YYYY-MM').endOf('month').toDate();
-    
+
             // Fetch the latest banner for position 1 within the requested month
             const lastPosition1Banner = await SideBanner.findOne({
                 where: {
@@ -36,7 +37,7 @@ class SideBannerController {
                 },
                 order: [["end_date", "DESC"]],
             });
-    
+
             // Fetch the latest banner for position 2 within the requested month
             const lastPosition2Banner = await SideBanner.findOne({
                 where: {
@@ -47,7 +48,7 @@ class SideBannerController {
                 },
                 order: [["end_date", "DESC"]],
             });
-    
+
             // Prepare the slot object for the requested month
             const monthSlot = {
                 start_date,
@@ -59,14 +60,14 @@ class SideBannerController {
                     isAvailable: !lastPosition2Banner, // Position 2 is available if no banner is found
                 },
             };
-    
+
             // Return the available slot for the requested month
             return returnHelper(res, 200, true, "Available Slot", [monthSlot]);
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message);
         }
     }
-    
+
 
     async assignSlot(req: RequestWithUser, res: Response) {
         const { campaign_title, start_date, end_date, position, target_type } = req.body;
@@ -74,6 +75,24 @@ class SideBannerController {
         // Validate input fields
         if (!campaign_title || !start_date || !end_date || !position || !target_type) {
             return returnHelper(res, 200, false, "Please Provide Required Fields")
+        }
+
+        // here check for active subscription 
+        const activeSubscription = await Subscription.findOne({
+            where: {
+                agent_uuid: req.user?.user?.uuid,
+                achievement_banner: {
+                    [Op.gt]: 0
+                },
+                leads_remaining: {
+                    [Op.gt]: 0
+                }
+            },
+            order: [["createdAt", "DESC"]]
+        })
+
+        if (!activeSubscription) {
+            return returnHelper(res, 200, false, "You Can not higlight your highlights, Please purchase package or add on to do this action")
         }
 
         // image name
@@ -119,11 +138,20 @@ class SideBannerController {
                 position,
                 target_type: target_type,
                 status: "pending", // Default status
-            }).then(() => {
+            }).then(async() => {
                 fs.writeFileSync(
                     path.join("public/banners", image),
                     req.file.buffer
                 );
+
+                // update subscriptioon
+                await Subscription.update({
+                    achievement_banner: Number(activeSubscription?.dataValues?.achievement_banner) - 1
+                },{
+                    where:{
+                        uuid:activeSubscription?.dataValues?.uuid
+                    }
+                })
             })
 
             return res.status(201).json({
@@ -176,9 +204,27 @@ class SideBannerController {
         }
     }
 
-    async canAssign(req:RequestWithUser,res:Response){
+    async canAssign(req: RequestWithUser, res: Response) {
         try {
-            
+
+            const activeSubscription = await Subscription.findOne({
+                where: {
+                    agent_uuid: req.user?.user?.uuid,
+                    achievement_banner: {
+                        [Op.gt]: 0
+                    },
+                    leads_remaining: {
+                        [Op.gt]: 0
+                    }
+                },
+                order: [["createdAt", "DESC"]]
+            })
+
+            return returnHelper(res, 200, true, "Records Found", {
+                can_assign: activeSubscription ? true : false,
+                remaining: activeSubscription?.dataValues?.achievement_banner
+            })
+
         } catch (error) {
             console.error("Error in canAssign:", error);
             return res.status(500).json({

@@ -14,6 +14,7 @@ sideBannerRoutes.route("/assign_slots").post(validateAgent, uploadImage.single("
 sideBannerRoutes.route("/list/:find_for").get(validateAgent, SideBannerController.listCamp)
 
 // details from campains 
+sideBannerRoutes.route("/can_assign_slot").get(validateAgent, SideBannerController.canAssign)
 
 
 export default sideBannerRoutes
