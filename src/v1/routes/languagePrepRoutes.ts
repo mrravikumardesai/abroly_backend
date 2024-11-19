@@ -50,7 +50,7 @@ studentRoutes.route("/purchase_course_details").post(validateUser, LanguagePrepC
 studentRoutes.route("/purchase_sub_point_details").post(validateUser, LanguagePrepController.purchaseCourseSubPointDetails)
 studentRoutes.route("/progress_check").post(validateUser, LanguagePrepController.getCourseProgress)
 studentRoutes.route("/progress_update").post(validateUser, LanguagePrepController.updateCourseProgress)
-
+studentRoutes.route("/certificate_details").post(LanguagePrepController.CertificateDetails)
 
 languagePrepRoutes.use("/student", studentRoutes)
 export default languagePrepRoutes
