@@ -1,5 +1,5 @@
 import express from 'express'
-import { validateAdmin, validateAgent } from '../../middleware/authMiddleware'
+import { validateAdmin, validateAgent, validateUser } from '../../middleware/authMiddleware'
 import SideBannerController from '../controller/SideBannerController'
 import { uploadImage } from '../../middleware/fileUpload'
 
@@ -24,5 +24,16 @@ adminRoutes.route("/list").post(validateAdmin, SideBannerController.adminSideLis
 adminRoutes.route("/action").post(validateAdmin, SideBannerController.adminAction)
 
 
-sideBannerRoutes.use("/admin",adminRoutes)
+sideBannerRoutes.use("/admin", adminRoutes)
+
+
+// student 
+
+const studentRoutes = express.Router()
+
+studentRoutes.route("/achievement/:target_type").get(validateUser, SideBannerController.studentActiveAchievement)
+studentRoutes.route("/add_interest").post(SideBannerController.sideBannerResponseAdd)
+
+sideBannerRoutes.use("/student", studentRoutes)
+
 export default sideBannerRoutes

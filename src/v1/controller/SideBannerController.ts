@@ -8,6 +8,7 @@ import fs from 'fs'
 import path from 'path'
 import Subscription from "../../model/Subscription";
 import Agent from "../../model/Agent";
+import SideBannerResponses from "../../model/SideBannerResponses";
 
 class SideBannerController {
 
@@ -353,6 +354,119 @@ class SideBannerController {
 
         } catch (error) {
             console.error("Error in adminAction:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+    async studentActiveAchievement(req: RequestWithUser, res: Response) {
+        try {
+
+            let { target_type } = req.params
+
+            if (!target_type) {
+                return returnHelper(res, 200, false, "Invalid Request")
+            }
+
+            // Get the start and end datetime of the current month using moment
+            const startOfMonth = moment().startOf("month").format("YYYY-MM-DD HH:mm:ss"); // Start of the current month
+            const endOfMonth = moment().endOf("month").format("YYYY-MM-DD HH:mm:ss"); // End of the current month
+
+            // Fetch records for the current month
+            const records = await SideBanner.findAll({
+                where: {
+                    target_type,
+                    status: "accept",
+                    [Op.or]: [
+                        {
+                            start_date: {
+                                [Op.between]: [startOfMonth, endOfMonth],
+                            },
+                        },
+                        {
+                            end_date: {
+                                [Op.between]: [startOfMonth, endOfMonth],
+                            },
+                        },
+                        {
+                            [Op.and]: [
+                                { start_date: { [Op.lte]: endOfMonth } }, // Started before or within this month
+                                { end_date: { [Op.gte]: startOfMonth } }, // Ends after or within this month
+                            ],
+                        },
+                    ],
+                },
+                attributes: [
+                    "uuid",
+                    "image",
+                    "campaign_title",
+                    "start_date",
+                    "end_date",
+                    "status",
+                    "position",
+                    "access_image",
+                ],
+            });
+
+            return returnHelper(res, 200, true, "Achievements Found", records)
+
+        } catch (error) {
+            console.error("Error in studentActiveAchievement:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+    async sideBannerResponseAdd(req: RequestWithUser, res: Response) {
+        try {
+            // SideBannerResponses
+
+            const {
+                name,
+                email,
+                phone_number,
+                banner_id
+            } = req.body
+
+            if (!name) {
+                return returnHelper(res, 200, false, "Provide Name")
+            }
+            if (!email) {
+                return returnHelper(res, 200, false, "Provide Email")
+            }
+            if (!phone_number) {
+                return returnHelper(res, 200, false, "Provide Phone Number")
+            }
+            if (!banner_id) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findExist = await SideBannerResponses.findOne({
+                where: {
+                    phone_number,
+                    banner_id
+                }
+            })
+
+            if (findExist) {
+                return returnHelper(res, 200, false, "You've Already Submitted")
+            }
+
+            await SideBannerResponses.create({
+                name,
+                email,
+                phone_number,
+                banner_id
+            })
+
+            return returnHelper(res, 200, true, "Thank you for your interest")
+
+        } catch (error) {
+            console.error("Error in sideBannerResponseAdd:", error);
             return res.status(500).json({
                 success: false,
                 message: "Internal server error",
