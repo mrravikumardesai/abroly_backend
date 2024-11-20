@@ -7,6 +7,8 @@ import { Op } from "sequelize";
 import fs from 'fs'
 import path from 'path'
 import Subscription from "../../model/Subscription";
+import Agent from "../../model/Agent";
+import SideBannerResponses from "../../model/SideBannerResponses";
 
 class SideBannerController {
 
@@ -34,6 +36,9 @@ class SideBannerController {
                     target_type,
                     start_date: { [Op.lte]: end_date },
                     end_date: { [Op.gte]: start_date },
+                    status: {
+                        [Op.ne]: 'reject'
+                    }
                 },
                 order: [["end_date", "DESC"]],
             });
@@ -45,6 +50,9 @@ class SideBannerController {
                     target_type,
                     start_date: { [Op.lte]: end_date },
                     end_date: { [Op.gte]: start_date },
+                    status: {
+                        [Op.ne]: 'reject'
+                    }
                 },
                 order: [["end_date", "DESC"]],
             });
@@ -107,6 +115,9 @@ class SideBannerController {
                 where: {
                     position, // Same position
                     target_type,
+                    status: {
+                        [Op.ne]: 'reject'
+                    },
                     [Op.or]: [
                         {
                             start_date: { [Op.between]: [start_date, end_date] }, // Overlaps with the provided range
@@ -138,7 +149,7 @@ class SideBannerController {
                 position,
                 target_type: target_type,
                 status: "pending", // Default status
-            }).then(async() => {
+            }).then(async () => {
                 fs.writeFileSync(
                     path.join("public/banners", image),
                     req.file.buffer
@@ -147,9 +158,9 @@ class SideBannerController {
                 // update subscriptioon
                 await Subscription.update({
                     achievement_banner: Number(activeSubscription?.dataValues?.achievement_banner) - 1
-                },{
-                    where:{
-                        uuid:activeSubscription?.dataValues?.uuid
+                }, {
+                    where: {
+                        uuid: activeSubscription?.dataValues?.uuid
                     }
                 })
             })
@@ -233,6 +244,237 @@ class SideBannerController {
             });
         }
     }
+
+    async adminSideList(req: RequestWithUser, res: Response) {
+        try {
+
+            let { status, search } = req.body
+
+            if (!status) {
+                status = "pending"
+            }
+
+            if (status && !["pending", "history"].includes(status)) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            // Define where condition for banner status
+            const whereCondition = {
+                status: { [Op.in]: status === "pending" ? ["pending"] : ["reject", "accept"] }
+            };
+
+            // Define where condition for search
+            const whereSearchParams: any = {};
+            if (search) {
+                whereSearchParams[Op.or] = [
+                    { campaign_title: { [Op.like]: `%${search}%` } }, // Search in campaign_title
+                    { "$banner_of.uuid$": { [Op.like]: `%${search}%` } }, // Search in Agent username
+                    { "$banner_of.username$": { [Op.like]: `%${search}%` } }, // Search in Agent username
+                    { "$banner_of.phone_number$": { [Op.like]: `%${search}%` } } // Search in Agent phone_number
+                ];
+            }
+
+            // Combine status and search conditions
+            const finalWhereCondition = {
+                ...whereCondition,
+                ...whereSearchParams,
+            };
+
+            // Fetch records
+            const findRecords = await SideBanner.findAll({
+                where: finalWhereCondition,
+                attributes: [
+                    "uuid",
+                    "access_image",
+                    "campaign_title",
+                    "image",
+                    "start_date",
+                    "end_date",
+                    "status",
+                    "position",
+                    "target_type",
+                    "createdAt",
+                ],
+                include: [
+                    {
+                        model: Agent,
+                        as: "banner_of",
+                        attributes: ["uuid", "username", "profile_image", "access_profile", "phone_number"],
+                        required: true,
+                        paranoid: false
+                    }
+                ]
+            });
+
+
+            return returnHelper(res, 200, true, "Records Found", findRecords)
+
+        } catch (error) {
+            console.error("Error in adminSideList:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+    async adminAction(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid, status } = req.body
+
+            if (!uuid || !status) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            if (status && !["accept", "reject"].includes(status)) {
+                return returnHelper(res, 200, false, "Provide Valid Action")
+            }
+
+            const findSideBanner = await SideBanner.findOne({
+                where: {
+                    uuid
+                }
+            })
+
+            if (!findSideBanner) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            await SideBanner.update({
+                status: status
+            }, {
+                where: {
+                    uuid
+                }
+            })
+
+            return returnHelper(res, 200, true, "Status Updated,Action Done!")
+
+
+        } catch (error) {
+            console.error("Error in adminAction:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+    async studentActiveAchievement(req: RequestWithUser, res: Response) {
+        try {
+
+            let { target_type } = req.params
+
+            if (!target_type) {
+                return returnHelper(res, 200, false, "Invalid Request")
+            }
+
+            // Get the start and end datetime of the current month using moment
+            const startOfMonth = moment().startOf("month").format("YYYY-MM-DD HH:mm:ss"); // Start of the current month
+            const endOfMonth = moment().endOf("month").format("YYYY-MM-DD HH:mm:ss"); // End of the current month
+
+            // Fetch records for the current month
+            const records = await SideBanner.findAll({
+                where: {
+                    target_type,
+                    status: "accept",
+                    [Op.or]: [
+                        {
+                            start_date: {
+                                [Op.between]: [startOfMonth, endOfMonth],
+                            },
+                        },
+                        {
+                            end_date: {
+                                [Op.between]: [startOfMonth, endOfMonth],
+                            },
+                        },
+                        {
+                            [Op.and]: [
+                                { start_date: { [Op.lte]: endOfMonth } }, // Started before or within this month
+                                { end_date: { [Op.gte]: startOfMonth } }, // Ends after or within this month
+                            ],
+                        },
+                    ],
+                },
+                attributes: [
+                    "uuid",
+                    "image",
+                    "campaign_title",
+                    "start_date",
+                    "end_date",
+                    "status",
+                    "position",
+                    "access_image",
+                ],
+            });
+
+            return returnHelper(res, 200, true, "Achievements Found", records)
+
+        } catch (error) {
+            console.error("Error in studentActiveAchievement:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+    async sideBannerResponseAdd(req: RequestWithUser, res: Response) {
+        try {
+            // SideBannerResponses
+
+            const {
+                name,
+                email,
+                phone_number,
+                banner_id
+            } = req.body
+
+            if (!name) {
+                return returnHelper(res, 200, false, "Provide Name")
+            }
+            if (!email) {
+                return returnHelper(res, 200, false, "Provide Email")
+            }
+            if (!phone_number) {
+                return returnHelper(res, 200, false, "Provide Phone Number")
+            }
+            if (!banner_id) {
+                return returnHelper(res, 200, false, "Invalid Action")
+            }
+
+            const findExist = await SideBannerResponses.findOne({
+                where: {
+                    phone_number,
+                    banner_id
+                }
+            })
+
+            if (findExist) {
+                return returnHelper(res, 200, false, "You've Already Submitted")
+            }
+
+            await SideBannerResponses.create({
+                name,
+                email,
+                phone_number,
+                banner_id
+            })
+
+            return returnHelper(res, 200, true, "Thank you for your interest")
+
+        } catch (error) {
+            console.error("Error in sideBannerResponseAdd:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+
 
 
 }
