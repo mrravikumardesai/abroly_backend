@@ -9,6 +9,7 @@ import Courses from "../model/Courses"
 import JobApplicants from "../model/JobApplicants"
 import JobPost from "../model/JobPost"
 import Package from "../model/Packages"
+import SideBanner from "../model/SideBanner"
 import Subscription from "../model/Subscription"
 import User from "../model/User"
 import VisaType from "../model/VisaType"
@@ -169,6 +170,19 @@ const associateModels = () => {
         foreignKey: "student_uuid",
         sourceKey: "uuid",
         as:"courses"
+    })
+
+    // side banner to agent 
+    SideBanner.belongsTo(Agent,{
+        foreignKey:"agent_uuid",
+        targetKey:"uuid",
+        as:"banner_of"
+    })
+
+    Agent.hasMany(SideBanner,{
+        foreignKey:"agent_uuid",
+        sourceKey:"uuid",
+        as:"achievements"
     })
 
 }

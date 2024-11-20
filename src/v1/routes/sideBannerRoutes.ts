@@ -1,5 +1,5 @@
 import express from 'express'
-import { validateAgent } from '../../middleware/authMiddleware'
+import { validateAdmin, validateAgent } from '../../middleware/authMiddleware'
 import SideBannerController from '../controller/SideBannerController'
 import { uploadImage } from '../../middleware/fileUpload'
 
@@ -17,4 +17,12 @@ sideBannerRoutes.route("/list/:find_for").get(validateAgent, SideBannerControlle
 sideBannerRoutes.route("/can_assign_slot").get(validateAgent, SideBannerController.canAssign)
 
 
+// admin routes 
+const adminRoutes = express.Router()
+
+adminRoutes.route("/list").post(validateAdmin, SideBannerController.adminSideList)
+adminRoutes.route("/action").post(validateAdmin, SideBannerController.adminAction)
+
+
+sideBannerRoutes.use("/admin",adminRoutes)
 export default sideBannerRoutes
