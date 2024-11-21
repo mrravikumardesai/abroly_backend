@@ -341,6 +341,25 @@ class SideBannerController {
                 return returnHelper(res, 200, false, "Invalid Action")
             }
 
+            if (status == "reject") {
+                // find last subscription of that user and +1 to it 
+                const findLastSubscription = await Subscription.findOne({
+                    where: {
+                        agent_uuid: findSideBanner?.dataValues?.agent_uuid
+                    },
+                    order: [["createdAt", "DESC"]]
+                })
+                if (findLastSubscription) {
+                    await Subscription.update({
+                        achievement_banner: Number(findLastSubscription?.dataValues?.achievement_banner) + 1
+                    }, {
+                        where: {
+                            uuid: findLastSubscription?.dataValues?.uuid
+                        }
+                    })
+                }
+            }
+
             await SideBanner.update({
                 status: status
             }, {
@@ -432,6 +451,16 @@ class SideBannerController {
                 banner_id
             } = req.body
 
+            const isSideBannerExist = await SideBanner.findOne({
+                where: {
+                    uuid: banner_id
+                }
+            })
+
+            if (!isSideBannerExist) {
+                return returnHelper(res, 200, false, "Can not store your response")
+            }
+
             if (!name) {
                 return returnHelper(res, 200, false, "Provide Name")
             }
@@ -463,6 +492,15 @@ class SideBannerController {
                 banner_id
             })
 
+            // here add +1 in responses 
+            await SideBanner.update({
+                responses: Number(isSideBannerExist?.dataValues?.responses) + 1
+            }, {
+                where: {
+                    uuid: isSideBannerExist?.dataValues?.uuid
+                }
+            })
+
             return returnHelper(res, 200, true, "Thank you for your interest")
 
         } catch (error) {
@@ -471,6 +509,28 @@ class SideBannerController {
                 success: false,
                 message: "Internal server error",
             });
+        }
+    }
+
+    async sideBannerResponsesGet(req: RequestWithUser, res: Response) {
+        try {
+
+            const { uuid } = req.body
+
+            if (!uuid) {
+                return returnHelper(res, 200, false, "Invalid action")
+            }
+
+            const findAll = await SideBannerResponses.findAll({
+                where: {
+                    banner_id: uuid
+                }
+            })
+
+            return returnHelper(res, 200, true, "Find Responses", findAll)
+
+        } catch (error) {
+
         }
     }
 
