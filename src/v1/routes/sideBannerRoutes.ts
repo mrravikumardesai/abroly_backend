@@ -16,12 +16,16 @@ sideBannerRoutes.route("/list/:find_for").get(validateAgent, SideBannerControlle
 // details from campains 
 sideBannerRoutes.route("/can_assign_slot").get(validateAgent, SideBannerController.canAssign)
 
+// get response of active side banner event
+sideBannerRoutes.route("/get_responses").post(validateAgent, SideBannerController.sideBannerResponsesGet)
 
 // admin routes 
 const adminRoutes = express.Router()
 
 adminRoutes.route("/list").post(validateAdmin, SideBannerController.adminSideList)
 adminRoutes.route("/action").post(validateAdmin, SideBannerController.adminAction)
+// get response of active side banner event
+adminRoutes.route("/get_responses").post(validateAdmin, SideBannerController.sideBannerResponsesGet)
 
 
 sideBannerRoutes.use("/admin", adminRoutes)
