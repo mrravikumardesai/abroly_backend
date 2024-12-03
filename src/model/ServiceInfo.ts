@@ -29,7 +29,7 @@ const ServiceInfo = sequelize.define('ServiceInfo', {
         defaultValue: 'text'
     },
     content_of: {
-        type: DataTypes.ENUM("sop", "motivation", "cover", "language", "sim_card", "health_ins"),
+        type: DataTypes.ENUM("sop", "motivation", "cover", "language", "sim_card", "health_ins","career","visa_consultation","tourist_visa"),
     },
     order: {
         type: DataTypes.INTEGER,
