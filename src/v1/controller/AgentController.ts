@@ -733,9 +733,10 @@ class AgentController {
                         { phone_number: { [Op.like]: `%${search}%` } },  // search by phone number
                         { username: { [Op.like]: `%${search}%` } },      // search by username
                         { email: { [Op.like]: `%${search}%` } },         // search by email
-                    ]
+                    ],
+                    role: "agent"
                 }
-                : {};
+                : {role: "agent"};
 
             const total = await Agent.count({
                 where: searchCondition

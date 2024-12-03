@@ -256,6 +256,45 @@ class StudentController {
             })
         }
     }
+    async getProfileCompletionProgress(req: RequestWithUser, res: Response) {
+        try {
+            const findStudentDetails = await StudentBasicDetails.findOne({
+                where: {
+                    student_uuid: req.user?.user?.uuid
+                }
+            });
+
+            if (!findStudentDetails) {
+                return returnHelper(res, 200, true, "No profile found", { completionPercentage: 0, missingFields: [] });
+            }
+
+            const totalFields = 31; // Total number of fields in StudentBasicDetails
+            let filledFields = 0;
+            const missingFields: string[] = [];
+
+            // Check each field for completion
+            for (const key in findStudentDetails.dataValues) {
+                if (findStudentDetails.dataValues[key] !== null && findStudentDetails.dataValues[key] !== "") {
+                    filledFields++;
+                } else {
+                    missingFields.push(key); // Collect missing fields
+                }
+            }
+
+            const completionPercentage = (filledFields / totalFields) * 100;
+
+            return returnHelper(res, 200, true, "Profile completion progress", { completionPercentage, missingFields });
+        } catch (error: any) {
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
+
+
+
     async getBasicDetailsAdmin(req: RequestWithUser, res: Response) {
 
         try {

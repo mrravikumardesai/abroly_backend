@@ -6,6 +6,8 @@ import { validateAddSubscription, validateUpdateSubscription } from "../validati
 import Package from "../../model/Packages";
 import { Op } from "sequelize";
 import AddOn from "../../model/AddOn";
+import User from "../../model/User";
+import Agent from "../../model/Agent";
 // Import validation functions
 
 class SubscriptionController {
@@ -32,6 +34,19 @@ class SubscriptionController {
             if (!findPackage) {
                 return returnHelper(res, 200, false, "Package Not Found")
             }
+
+            const subAgentCount = await Agent.count({
+                where: {
+                    parent_uuid: agent_uuid,
+                    role: "sub-agent"
+                }
+            });
+
+            if (subAgentCount > findPackage?.dataValues?.teamLimit) {
+                const excessCount = subAgentCount - findPackage?.dataValues?.teamLimit;
+                return returnHelper(res, 200, false, `Existing sub-agents (${subAgentCount}) are more than the current package limit. Please delete ${excessCount} sub-agents.`);
+            }
+
             // start date and end date 
             const startDate = new Date()
 
@@ -72,6 +87,19 @@ class SubscriptionController {
             if (!agent_uuid) {
                 return returnHelper(res, 200, false, "Please Provide Agent ")
             }
+
+            const subAgentCount = await Agent.count({
+                where: {
+                    parent_uuid: agent_uuid,
+                    role: "sub-agent"
+                }
+            });
+
+            if (subAgentCount > teamLimit) {
+                const excessCount = subAgentCount - teamLimit;
+                return returnHelper(res, 200, false, `Existing sub-agents (${subAgentCount}) are more than the current package limit. Please delete ${excessCount} sub-agents.`);
+            }
+
 
             // start date and end date 
             const startDate = new Date()
@@ -145,9 +173,18 @@ class SubscriptionController {
 
             // job_post_days 
             if (job_post_days && job_post_days !== "") {
-                const job_post_end_date = new Date(findSubscription?.dataValues?.job_post_end_date)
-                job_post_end_date.setDate(job_post_end_date.getDate() + +job_post_days)
-                updateParms["job_post_end_date"] = job_post_end_date
+                // const job_post_end_date = new Date(findSubscription?.dataValues?.job_post_end_date)
+                // job_post_end_date.setDate(job_post_end_date.getDate() + +job_post_days)
+                // updateParms["job_post_end_date"] = job_post_end_date
+                const currentJobPostEndDate = new Date(findSubscription?.dataValues?.job_post_end_date);
+                const today = new Date();
+
+                if (currentJobPostEndDate > today) {
+                    currentJobPostEndDate.setDate(currentJobPostEndDate.getDate() + +job_post_days);
+                } else {
+                    currentJobPostEndDate.setTime(today.getDate() + +job_post_days);
+                }
+                updateParms["job_post_end_date"] = currentJobPostEndDate;
             }
             // achievement_banner
             if (achievement_banner && achievement_banner !== "") {
