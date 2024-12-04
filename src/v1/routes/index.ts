@@ -22,6 +22,7 @@ import calendarRoutes from "./calendarRoutes"
 import serviceInfoRoutes from "./serviceInfoRoutes"
 import agentProfileRoutes from "./agentProfileRoutes"
 import sideBannerRoutes from "./sideBannerRoutes"
+import eventBannerRoutes from "./eventBannerRoutes"
 
 
 
@@ -65,6 +66,8 @@ v1_routes.use("/calendar", calendarRoutes)
 
 // service information pages
 v1_routes.use("/service_info",serviceInfoRoutes)
+
+v1_routes.use('/event-banners', eventBannerRoutes)
 
 
 
