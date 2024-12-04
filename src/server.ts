@@ -81,6 +81,7 @@ const connectDB = async () => {
       createDefaultFolders("service_info")
       createDefaultFolders("certificates")
       createDefaultFolders("banners")
+      createDefaultFolders("event_images")
     })
     .catch((e) => {
       console.error("ERROR TO CONNECT DB", e.toString());
