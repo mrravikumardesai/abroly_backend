@@ -7,9 +7,8 @@ const eventBannerRoutes = Router();
 
 // Admin only route to create event banner
 eventBannerRoutes.post("/public-create", validateAdmin,uploadMedia.any(), EventBannerController.createEventBanner);
-// Note: Ensure multer is used for handling file uploads in the controller
+eventBannerRoutes.get("/public-get/:id", validateAdmin,EventBannerController.getEventBannerById);
 
-// Route to list event banners (accessible to agents)
 eventBannerRoutes.get("/", EventBannerController.listEventBanners);
 
 export default eventBannerRoutes; 

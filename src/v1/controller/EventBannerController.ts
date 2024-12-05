@@ -50,6 +50,27 @@ class EventBannerController {
         }
     }
 
+    async getEventBannerById(req: RequestWithUser, res: Response) {
+        try {
+            const { id } = req.params; // Get the id from the request parameters
+
+            // Validate the id
+            if (!id) {
+                return returnHelper(res, 200, false, "Event Banner ID is required");
+            }
+
+            const eventBanner = await EventBanner.findOne({ where: { uuid: id } });
+
+            if (!eventBanner) {
+                return returnHelper(res, 200, false, "Event Banner not found");
+            }
+
+            return returnHelper(res, 200, true, "Event Banner Found", eventBanner);
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+
     async listEventBanners(req: RequestWithUser, res: Response) {
         try {
             const eventBanners = await EventBanner.findAll();

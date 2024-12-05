@@ -3,18 +3,18 @@ import EventBanner from './EventBanner'; // Import the EventBanner model
 import sequelize from '../config/dbconfig';
 
 const EventBannerImage = sequelize.define('EventBannerImage', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
     },
     eventBannerId: {
         type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-            model: EventBanner,
-            key: 'uuid',
-        },
+        allowNull: false
     },
     imageUrl: {
         type: DataTypes.STRING,
@@ -24,5 +24,6 @@ const EventBannerImage = sequelize.define('EventBannerImage', {
     tableName: 'event_banner_images', // Optional: specify the table name if different
     timestamps: true, // Optional: if you want to include createdAt and updatedAt
 });
+
 
 export default EventBannerImage; 
