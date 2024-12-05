@@ -6,6 +6,8 @@ import CourseChapterPoints from "../model/CourseChapterPoints"
 import CourseChapters from "../model/CourseChapters"
 import CoursePurchase from "../model/CoursePurchase"
 import Courses from "../model/Courses"
+import EventBannerImage from "../model/EventBannerImage"
+import EventBanner from "../model/EventBanner"
 import JobApplicants from "../model/JobApplicants"
 import JobPost from "../model/JobPost"
 import Package from "../model/Packages"
@@ -183,6 +185,19 @@ const associateModels = () => {
         foreignKey:"agent_uuid",
         sourceKey:"uuid",
         as:"achievements"
+    })
+
+    // associate event banner with event banner image
+    EventBanner.hasMany(EventBannerImage,{
+        foreignKey:"eventBannerId",
+        sourceKey:"uuid",
+        as:"images"
+    })
+
+    EventBannerImage.belongsTo(EventBanner,{
+        foreignKey:"eventBannerId",
+        targetKey:"uuid",
+        as:"banner"
     })
 
 }
