@@ -20,6 +20,12 @@ const EventBannerImage = sequelize.define('EventBannerImage', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    url: {
+        type: DataTypes.VIRTUAL,
+        get(this: any) {
+          return this.imageUrl && this.imageUrl !== "" ? `${process.env.LOCAL_PATH}public/event_images/${this.imageUrl}` : null
+        },
+    },
 }, {
     tableName: 'event_banner_images', // Optional: specify the table name if different
     timestamps: true, // Optional: if you want to include createdAt and updatedAt
