@@ -5,6 +5,7 @@ import { returnHelper } from "../../helpers/returnHelper";
 import EventBannerImage from "../../model/EventBannerImage";
 import path from "path";
 import fs from "fs";
+import { Op } from "sequelize";
 class EventBannerController {
 
     async createEventBanner(req: RequestWithUser, res: Response) {
@@ -210,8 +211,18 @@ class EventBannerController {
 
     async listEventBanners(req: RequestWithUser, res: Response) {
         try {
+            const { flag } = req.query; // Get the flag from the request query
+            const today = new Date();
+
+            const condition = flag === 'past' 
+                ? { end_date: { [Op.lt]: today } } // Filter for past event banners
+                : flag === 'current' 
+                ? { end_date: { [Op.gt]: today } } // Filter for future event banners
+                : {}; // No filter if flag is not recognized
+
             const eventBanners = await EventBanner.findAll({
-                attributes: ["uuid", "start_date", "end_date", "heading", "descriptive_text"],
+                where: condition,
+                attributes: ["uuid", "start_date", "end_date", "heading", "descriptive_text", "createdAt"],
                 include: [{ model: EventBannerImage, as: 'images', attributes: ["uuid", "imageUrl", "url"] }]
             });
             return returnHelper(res, 200, true, "Event Banners Found", eventBanners);
