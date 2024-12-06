@@ -11,6 +11,6 @@ eventBannerRoutes.post("/public-update", validateAdmin,uploadMedia.any(), EventB
 eventBannerRoutes.post("/public-delete-event/:uuid", validateAdmin,EventBannerController.deleteEventBanner);
 eventBannerRoutes.get("/public-get/:id", validateAdmin,EventBannerController.getEventBannerById);
 eventBannerRoutes.post("/public-delete/:uuid", validateAdmin,EventBannerController.deleteEventBannerImage);
-eventBannerRoutes.get("/", EventBannerController.listEventBanners);
+eventBannerRoutes.get("/public-list", EventBannerController.listEventBanners);
 
 export default eventBannerRoutes; 
