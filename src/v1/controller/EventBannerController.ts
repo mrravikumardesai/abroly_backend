@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { RequestWithUser } from "../../utils/types";
 import EventBanner from "../../model/EventBanner"; // Ensure you have the EventBanner model
 import { returnHelper } from "../../helpers/returnHelper";
@@ -6,6 +6,7 @@ import EventBannerImage from "../../model/EventBannerImage";
 import path from "path";
 import fs from "fs";
 import { Op } from "sequelize";
+import EventBannerResponses from "../../model/EventBannerResponses";
 class EventBannerController {
 
     async createEventBanner(req: RequestWithUser, res: Response) {
@@ -144,7 +145,9 @@ class EventBannerController {
                 return returnHelper(res, 200, false, "Event Banner Image not found");
             }
 
-
+            await EventBannerResponses.destroy({
+                where: { event_id: uuid }
+            });
 
             if (imageRecord.dataValues.imageUrl && imageRecord.dataValues.imageUrl !== "") {
 
@@ -214,22 +217,117 @@ class EventBannerController {
             const { flag } = req.query; // Get the flag from the request query
             const today = new Date();
 
-            const condition = flag === 'past' 
+            const condition = flag === 'past'
                 ? { end_date: { [Op.lt]: today } } // Filter for past event banners
-                : flag === 'current' 
-                ? { end_date: { [Op.gt]: today } } // Filter for future event banners
-                : {}; // No filter if flag is not recognized
+                : flag === 'current'
+                    ? { end_date: { [Op.gt]: today } } // Filter for future event banners
+                    : {}; // No filter if flag is not recognized
 
             const eventBanners = await EventBanner.findAll({
                 where: condition,
                 attributes: ["uuid", "start_date", "end_date", "heading", "descriptive_text", "createdAt"],
-                include: [{ model: EventBannerImage, as: 'images', attributes: ["uuid", "imageUrl", "url"] }]
+                include: [{ model: EventBannerImage, as: 'images', attributes: ["uuid", "imageUrl", "url"] }],
+                order: [['createdAt', 'DESC']]
             });
             return returnHelper(res, 200, true, "Event Banners Found", eventBanners);
         } catch (error: any) {
             return returnHelper(res, 500, false, error.message);
         }
     }
+
+
+    async createEventBannerResponse(req: Request, res: Response) {
+        try {
+            const { name, email, phone_number, event_id } = req.body;
+
+            // Validate input
+            if (!name) {
+                return returnHelper(res, 200, false, "Name is required");
+            }
+            if (!email) {
+                return returnHelper(res, 200, false, "Email is required");
+            }
+            if (!phone_number) {
+                return returnHelper(res, 200, false, "Phone number is required");
+            }
+            if (!event_id) {
+                return returnHelper(res, 200, false, "Event ID is required");
+            }
+
+            const existingResponse = await EventBannerResponses.findOne({
+                where: {
+                    event_id,
+                    [Op.or]: [
+                        { email: email },
+                        { phone_number: phone_number }
+                    ]
+                }
+            });
+
+            if (existingResponse) {
+                return returnHelper(res, 200, false, "Already responded with the same email or phone number for this event.");
+            }
+
+            // Create a new response entry
+            await EventBannerResponses.create({
+                name,
+                email,
+                phone_number,
+                event_id
+            });
+
+            return returnHelper(res, 200, true, "Your interest has been recorded successfully, we will contact you soon.");
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+
+    async listEventBannerResponses(req: RequestWithUser, res: Response) {
+        try {
+            const { page = 1, limit = 10 } = req.query;
+            const { event_id } = req.params;
+
+            const offset = (Number(page) - 1) * Number(limit);
+            const eventBannerResponses = await EventBannerResponses.findAndCountAll({
+                limit: Number(limit),
+                offset: offset,
+                where: { event_id },
+                order: [['createdAt', 'DESC']],
+            });
+
+            const totalPages = Math.ceil(eventBannerResponses.count / Number(limit));
+
+            return returnHelper(res, 200, true, "Event Banner Responses Found", {
+                data: eventBannerResponses.rows,
+                total: totalPages,
+                currentPage: Number(page),
+                totalCount: eventBannerResponses.count,
+            });
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+
+    async getActiveEvents(req: RequestWithUser, res: Response) {
+        try {
+            const today = new Date();
+            const activeEvents = await EventBanner.findAll({
+                where: {
+                    end_date: {
+                        [Op.gt]: today
+                    }
+                },
+                include: [{ model: EventBannerImage, as: 'images', attributes: ["uuid", "imageUrl", "url"] }],
+                order: [['end_date', 'ASC']],
+                attributes: ["uuid", "start_date", "end_date", "heading", "descriptive_text", "createdAt"],
+            });
+
+            return returnHelper(res, 200, true, "Active Events Found", activeEvents);
+        } catch (error: any) {
+            return returnHelper(res, 500, false, error.message);
+        }
+    }
+
 }
 
 export default new EventBannerController(); 
